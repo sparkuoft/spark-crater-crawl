@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/antoinetabet/Developer/spark-crater-crawl",
+      "program": "/Users/antoinetabet/Developer/spark-crater-crawl/build/Debug/outDebug"
+    }
+  ]
+}
