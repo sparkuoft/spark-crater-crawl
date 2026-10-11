@@ -60,7 +60,6 @@ void pillarFsmUpdate(uint32_t now_ms) {
             case PILLAR_RISING:
             if (elapsed >= PILLAR_RISE_MS) {
                 p.phase = PILLAR_EXTENDED;
-                p.at_top = true;
                 p.phase_entered_ms = now_ms;
             }
             break;
@@ -75,7 +74,6 @@ void pillarFsmUpdate(uint32_t now_ms) {
             case PILLAR_LOWERING:
             if (elapsed >= PILLAR_LOWER_MS) {
                 p.phase = PILLAR_IDLE;
-                p.at_bottom = true;
                 p.phase_entered_ms = now_ms;
             }
             break;
@@ -89,8 +87,6 @@ void pillarFsmInit(uint32_t now_ms)
     for (uint8_t id = 0; id < NUM_PILLARS; id++)
     {
         g_state.pillars[id].phase = PILLAR_IDLE;
-        g_state.pillars[id].at_bottom = true;
-        g_state.pillars[id].at_top = false;
         g_state.pillars[id].warn_mode = WARN_EASY;
         g_state.pillars[id].phase_entered_ms = now_ms;
         fake[id] = false;
