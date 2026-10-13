@@ -20,8 +20,8 @@
 void game_fsm_init(uint32_t now_ms);
 void game_fsm_update(uint32_t now_ms); /* call every loop */
 
-void game_start(uint32_t now_ms); /* IDLE -> COUNTDOWN, ignored in any other phase */
-void game_reset(uint32_t now_ms); /* any phase -> IDLE */
+void game_start(uint32_t now_ms); /* IDLE -> COUNTDOWN. Ignored unless IDLE with all pillars down */
+void game_reset(uint32_t now_ms); /* any phase -> IDLE, and starts bringing pillars down */
 
 /* Collision report from Tracking (T|E). Only counts while RUNNING, and is
  * ignored for a player who is locked out or already eliminated. Forwards

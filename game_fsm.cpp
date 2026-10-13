@@ -111,6 +111,40 @@ static void announce_result(uint32_t now_ms)
     }
 }
 
+static bool all_pillars_down()
+{
+    for (uint8_t i = 0; i < NUM_PILLARS; i++)
+    {
+        if (g_state.pillars[i].phase != PILLAR_IDLE)
+            return false;
+    }
+    return true;
+}
+
+// TEMPORARY until pillar_fsm has a cancel / lower-all call of its own.
+// Stops the sequencer and cancels pending warnings so nothing new rises.
+// Pillars already RISING / EXTENDED / LOWERING are left to the pillar FSM,
+// which brings them down within MAX_SIMULTANEOUS_PILLAR_MOVES -- forcing all
+// six down at once could break the power cap.
+static void lower_all_pillars(uint32_t now_ms)
+{
+    sequencer_reset();
+
+    for (uint8_t i = 0; i < NUM_PILLARS; i++)
+    {
+        PillarState &p = g_state.pillars[i];
+        if (p.phase == PILLAR_WARNING)
+        {
+            p.phase = PILLAR_IDLE;
+            p.phase_entered_ms = now_ms;
+            log_stamp(now_ms);
+            Serial.print(F("pillar "));
+            Serial.print(i);
+            Serial.println(F(" warning cancelled"));
+        }
+    }
+}
+
 // Outbound to Wheels (W|E). No transport agreed with Alice yet, so for now
 // this only logs the payload.
 static void send_wheels_trigger(const WheelsTrigger &t, uint32_t now_ms)
@@ -145,6 +179,12 @@ void game_start(uint32_t now_ms)
         Serial.println(F("start ignored: not IDLE (reset first)"));
         return;
     }
+    if (!all_pillars_down())
+    {
+        log_stamp(now_ms);
+        Serial.println(F("start ignored: pillars still coming down"));
+        return;
+    }
 
     reset_players();
     enter_phase(PHASE_COUNTDOWN, now_ms);
@@ -152,7 +192,7 @@ void game_start(uint32_t now_ms)
 
 void game_reset(uint32_t now_ms)
 {
-    sequencer_reset();
+    lower_all_pillars(now_ms);
     reset_players();
     s_difficulty = WARN_EASY;
 
@@ -262,7 +302,7 @@ void game_fsm_update(uint32_t now_ms)
     case PHASE_RUNNING:
         if (any_player_eliminated())
         {
-            sequencer_reset();
+            lower_all_pillars(now_ms);
             enter_phase(PHASE_PLAYER_ELIMINATED, now_ms);
             announce_result(now_ms);
             break;
@@ -272,7 +312,8 @@ void game_fsm_update(uint32_t now_ms)
         break;
 
     case PHASE_PLAYER_ELIMINATED:
-        enter_phase(PHASE_GAME_OVER, now_ms);
+        if (all_pillars_down())
+            enter_phase(PHASE_GAME_OVER, now_ms);
         break;
 
     case PHASE_GAME_OVER:
