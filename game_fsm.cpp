@@ -5,9 +5,11 @@
 #include "debug_log.h"
 
 static_assert(DIFFICULTY_NORMAL_AT_MS < DIFFICULTY_HARD_AT_MS, "difficulty thresholds out of order");
+static_assert(PLAYER_LIVES >= 1, "PLAYER_LIVES must be at least 1");
 
 static WarningMode s_difficulty = WARN_EASY;
 static uint32_t s_round_started_ms = 0;
+static uint8_t s_hits[NUM_PLAYERS];
 
 static void enter_phase(GamePhase next, uint32_t now_ms)
 {
@@ -53,7 +55,73 @@ static void reset_players()
         pl.alive = true;
         pl.locked_out = false;
         pl.lockout_started_ms = 0;
+        s_hits[i] = 0;
     }
+}
+
+static void update_lockouts(uint32_t now_ms)
+{
+    for (uint8_t i = 0; i < NUM_PLAYERS; i++)
+    {
+        PlayerState &pl = g_state.players[i];
+        if (pl.locked_out && now_ms - pl.lockout_started_ms >= POST_HIT_LOCKOUT_MS)
+        {
+            pl.locked_out = false;
+            log_stamp(now_ms);
+            Serial.print('P');
+            Serial.print(i);
+            Serial.println(F(" lockout over"));
+        }
+    }
+}
+
+static bool any_player_eliminated()
+{
+    for (uint8_t i = 0; i < NUM_PLAYERS; i++)
+    {
+        if (!g_state.players[i].alive)
+            return true;
+    }
+    return false;
+}
+
+static void announce_result(uint32_t now_ms)
+{
+    uint8_t alive_count = 0;
+    uint8_t survivor = 0;
+    for (uint8_t i = 0; i < NUM_PLAYERS; i++)
+    {
+        if (g_state.players[i].alive)
+        {
+            alive_count++;
+            survivor = i;
+        }
+    }
+
+    log_stamp(now_ms);
+    if (alive_count == 1)
+    {
+        Serial.print(F("RESULT P"));
+        Serial.print(survivor);
+        Serial.println(F(" wins"));
+    }
+    else
+    {
+        Serial.println(F("RESULT draw"));
+    }
+}
+
+// Outbound to Wheels (W|E). No transport agreed with Alice yet, so for now
+// this only logs the payload.
+static void send_wheels_trigger(const WheelsTrigger &t, uint32_t now_ms)
+{
+    log_stamp(now_ms);
+    Serial.print(F("WHEELS player="));
+    Serial.print(t.player_id);
+    Serial.print(F(" fatal="));
+    Serial.print(t.fatal ? F("yes") : F("no"));
+    Serial.print(F(" ts="));
+    Serial.println(t.timestamp_ms);
 }
 
 void game_fsm_init(uint32_t now_ms)
@@ -92,8 +160,88 @@ void game_reset(uint32_t now_ms)
         enter_phase(PHASE_IDLE, now_ms);
 }
 
+void game_on_collision(const CollisionEvent &ev, uint32_t now_ms)
+{
+    if (!ev.hit)
+        return;
+
+    if (ev.player_id >= NUM_PLAYERS)
+    {
+        log_stamp(now_ms);
+        Serial.print(F("collision ignored: bad player_id "));
+        Serial.println(ev.player_id);
+        return;
+    }
+
+    // A lockout may have run out since the last update; settle it before checking.
+    update_lockouts(now_ms);
+    PlayerState &pl = g_state.players[ev.player_id];
+
+    // Logged before the checks so ignored hits are visible while testing. If
+    // Tracking ends up re-reporting every loop while a player overlaps a
+    // pillar, this will flood Serial and should be quietened.
+    log_stamp(now_ms);
+    Serial.print(F("HIT P"));
+    Serial.print(ev.player_id);
+    Serial.print(F(" pillar "));
+    Serial.print(ev.pillar_id);
+    Serial.print(F(" ("));
+    Serial.print(ev.pillar_id < NUM_PILLARS ? pillar_phase_name(g_state.pillars[ev.pillar_id].phase) : "bad id");
+    Serial.print(F(") ts="));
+    Serial.print(ev.timestamp_ms);
+
+    if (g_state.phase != PHASE_RUNNING)
+    {
+        Serial.println(F(": ignored, not RUNNING"));
+        return;
+    }
+    if (!pl.alive)
+    {
+        Serial.println(F(": ignored, already eliminated"));
+        return;
+    }
+    if (pl.locked_out)
+    {
+        Serial.print(F(": ignored, locked out for "));
+        Serial.print(POST_HIT_LOCKOUT_MS - (now_ms - pl.lockout_started_ms));
+        Serial.println(F(" more ms"));
+        return;
+    }
+    Serial.println();
+
+    // Pillar phase deliberately not checked: Tracking is the authority, and a
+    // pillar can hit a player while RISING, not just EXTENDED.
+    s_hits[ev.player_id]++;
+
+    WheelsTrigger t;
+    t.player_id = ev.player_id;
+    t.fatal = s_hits[ev.player_id] >= PLAYER_LIVES;
+    t.timestamp_ms = ev.timestamp_ms;
+    send_wheels_trigger(t, now_ms);
+
+    if (t.fatal)
+    {
+        // Wheels holds on a fatal hit, so no lockout. RUNNING ends the round on
+        // the next update, which also lets a same-loop hit on the other player
+        // count as a draw.
+        pl.alive = false;
+        return;
+    }
+
+    // Timed from when the trigger is sent, not ev.timestamp_ms: Alice's 1.2 s
+    // is measured end-to-end from the command.
+    pl.locked_out = true;
+    pl.lockout_started_ms = now_ms;
+    log_stamp(now_ms);
+    Serial.print('P');
+    Serial.print(ev.player_id);
+    Serial.println(F(" locked out"));
+}
+
 void game_fsm_update(uint32_t now_ms)
 {
+    update_lockouts(now_ms);
+
     uint32_t in_phase_ms = now_ms - g_state.phase_entered_ms;
 
     switch (g_state.phase)
@@ -112,11 +260,19 @@ void game_fsm_update(uint32_t now_ms)
         break;
 
     case PHASE_RUNNING:
+        if (any_player_eliminated())
+        {
+            sequencer_reset();
+            enter_phase(PHASE_PLAYER_ELIMINATED, now_ms);
+            announce_result(now_ms);
+            break;
+        }
         update_difficulty(now_ms);
         sequencer_update(now_ms, s_difficulty);
         break;
 
     case PHASE_PLAYER_ELIMINATED:
+        enter_phase(PHASE_GAME_OVER, now_ms);
         break;
 
     case PHASE_GAME_OVER:
