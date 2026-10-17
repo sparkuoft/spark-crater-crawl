@@ -1,11 +1,25 @@
-#include <Arduino.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include "debug_log.h"
 
-void log_stamp(uint32_t now_ms)
+void log_line(uint32_t now_ms, const char *fmt, ...)
 {
-    Serial.print('[');
-    Serial.print(now_ms);
-    Serial.print(F("] "));
+    printf("[%lu] ", (unsigned long)now_ms);
+
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+
+    putchar('\n');
+}
+
+void log_text(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
 }
 
 const char *game_phase_name(GamePhase p)

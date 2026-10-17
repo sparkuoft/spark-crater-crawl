@@ -14,12 +14,12 @@ static PillarPhase s_last_pillar_phase[NUM_PILLARS];
 
 static void print_help()
 {
-    Serial.println(F("commands (end with newline):"));
-    Serial.println(F("  s         start game"));
-    Serial.println(F("  r         reset to IDLE"));
-    Serial.println(F("  h<p> [n]  fake hit on player p by pillar n (default 0), e.g. h0, h1 3"));
-    Serial.println(F("  w<n>      warn + raise pillar n (RUNNING only, stands in for the sequencer)"));
-    Serial.println(F("  ?         print state"));
+    log_text("commands (end with newline):\n"
+             "  s         start game\n"
+             "  r         reset to IDLE\n"
+             "  h<p> [n]  fake hit on player p by pillar n (default 0), e.g. h0, h1 3\n"
+             "  w<n>      warn + raise pillar n (RUNNING only, stands in for the sequencer)\n"
+             "  ?         print state\n");
 }
 
 // Reads an unsigned number at s (skipping leading spaces) and advances s past it.
@@ -44,37 +44,24 @@ static bool parse_uint8(const char *&s, uint8_t &out)
 
 static void print_status(uint32_t now_ms)
 {
-    log_stamp(now_ms);
-    Serial.print(F("STATUS phase="));
-    Serial.print(game_phase_name(g_state.phase));
-    Serial.print(F(" for "));
-    Serial.print(now_ms - g_state.phase_entered_ms);
-    Serial.print(F(" ms, difficulty="));
-    Serial.println(warning_mode_name(game_difficulty()));
+    log_line(now_ms, "STATUS phase=%s for %lu ms, difficulty=%s",
+             game_phase_name(g_state.phase),
+             (unsigned long)(now_ms - g_state.phase_entered_ms),
+             warning_mode_name(game_difficulty()));
 
     for (uint8_t i = 0; i < NUM_PLAYERS; i++)
     {
         const PlayerState &pl = g_state.players[i];
-        Serial.print(F("  P"));
-        Serial.print(i);
-        Serial.print(pl.alive ? F(" alive") : F(" eliminated"));
+        log_text("  P%u %s", (unsigned)i, pl.alive ? "alive" : "eliminated");
         if (pl.locked_out)
-        {
-            Serial.print(F(", locked out since "));
-            Serial.print(pl.lockout_started_ms);
-        }
-        Serial.println();
+            log_text(", locked out since %lu", (unsigned long)pl.lockout_started_ms);
+        log_text("\n");
     }
 
-    Serial.print(F("  pillars:"));
+    log_text("  pillars:");
     for (uint8_t i = 0; i < NUM_PILLARS; i++)
-    {
-        Serial.print(' ');
-        Serial.print(i);
-        Serial.print(':');
-        Serial.print(pillar_phase_name(g_state.pillars[i].phase));
-    }
-    Serial.println();
+        log_text(" %u:%s", (unsigned)i, pillar_phase_name(g_state.pillars[i].phase));
+    log_text("\n");
 }
 
 static void handle_line(const char *line, uint32_t now_ms)
@@ -117,14 +104,12 @@ static void handle_line(const char *line, uint32_t now_ms)
         }
         if (g_state.phase != PHASE_RUNNING)
         {
-            log_stamp(now_ms);
-            Serial.println(F("warn ignored: not RUNNING"));
+            log_line(now_ms, "warn ignored: not RUNNING");
             break;
         }
         if (!pillarStartWarning(a, game_difficulty(), false, now_ms))
         {
-            log_stamp(now_ms);
-            Serial.println(F("warn ignored: bad pillar id or pillar not IDLE"));
+            log_line(now_ms, "warn ignored: bad pillar id or pillar not IDLE");
         }
         break;
 
@@ -147,13 +132,7 @@ static void watch_pillars(uint32_t now_ms)
         if (p == s_last_pillar_phase[i])
             continue;
 
-        log_stamp(now_ms);
-        Serial.print(F("  pillar "));
-        Serial.print(i);
-        Serial.print(' ');
-        Serial.print(pillar_phase_name(s_last_pillar_phase[i]));
-        Serial.print(F(" -> "));
-        Serial.println(pillar_phase_name(p));
+        log_line(now_ms, "  pillar %u %s -> %s", (unsigned)i, pillar_phase_name(s_last_pillar_phase[i]), pillar_phase_name(p));
         s_last_pillar_phase[i] = p;
     }
 }
@@ -163,8 +142,7 @@ void serial_console_init(uint32_t now_ms)
     for (uint8_t i = 0; i < NUM_PILLARS; i++)
         s_last_pillar_phase[i] = g_state.pillars[i].phase;
 
-    log_stamp(now_ms);
-    Serial.println(F("serial console ready"));
+    log_line(now_ms, "serial console ready");
     print_help();
 }
 

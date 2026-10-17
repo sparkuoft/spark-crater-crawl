@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "game_fsm.h"
 #include "pillar_fsm.h"
 #include "sequencer.h"
@@ -13,11 +12,7 @@ static uint8_t s_hits[NUM_PLAYERS];
 
 static void enter_phase(GamePhase next, uint32_t now_ms)
 {
-    log_stamp(now_ms);
-    Serial.print(F("PHASE "));
-    Serial.print(game_phase_name(g_state.phase));
-    Serial.print(F(" -> "));
-    Serial.println(game_phase_name(next));
+    log_line(now_ms, "PHASE %s -> %s", game_phase_name(g_state.phase), game_phase_name(next));
 
     g_state.phase = next;
     g_state.phase_entered_ms = now_ms;
@@ -39,11 +34,7 @@ static void update_difficulty(uint32_t now_ms)
     if (next == s_difficulty)
         return;
 
-    log_stamp(now_ms);
-    Serial.print(F("DIFFICULTY "));
-    Serial.print(warning_mode_name(s_difficulty));
-    Serial.print(F(" -> "));
-    Serial.println(warning_mode_name(next));
+    log_line(now_ms, "DIFFICULTY %s -> %s", warning_mode_name(s_difficulty), warning_mode_name(next));
     s_difficulty = next;
 }
 
@@ -67,10 +58,7 @@ static void update_lockouts(uint32_t now_ms)
         if (pl.locked_out && now_ms - pl.lockout_started_ms >= POST_HIT_LOCKOUT_MS)
         {
             pl.locked_out = false;
-            log_stamp(now_ms);
-            Serial.print('P');
-            Serial.print(i);
-            Serial.println(F(" lockout over"));
+            log_line(now_ms, "P%u lockout over", (unsigned)i);
         }
     }
 }
@@ -98,17 +86,10 @@ static void announce_result(uint32_t now_ms)
         }
     }
 
-    log_stamp(now_ms);
     if (alive_count == 1)
-    {
-        Serial.print(F("RESULT P"));
-        Serial.print(survivor);
-        Serial.println(F(" wins"));
-    }
+        log_line(now_ms, "RESULT P%u wins", (unsigned)survivor);
     else
-    {
-        Serial.println(F("RESULT draw"));
-    }
+        log_line(now_ms, "RESULT draw");
 }
 
 static bool all_pillars_down()
@@ -137,10 +118,7 @@ static void lower_all_pillars(uint32_t now_ms)
         {
             p.phase = PILLAR_IDLE;
             p.phase_entered_ms = now_ms;
-            log_stamp(now_ms);
-            Serial.print(F("pillar "));
-            Serial.print(i);
-            Serial.println(F(" warning cancelled"));
+            log_line(now_ms, "pillar %u warning cancelled", (unsigned)i);
         }
     }
 }
@@ -149,13 +127,8 @@ static void lower_all_pillars(uint32_t now_ms)
 // this only logs the payload.
 static void send_wheels_trigger(const WheelsTrigger &t, uint32_t now_ms)
 {
-    log_stamp(now_ms);
-    Serial.print(F("WHEELS player="));
-    Serial.print(t.player_id);
-    Serial.print(F(" fatal="));
-    Serial.print(t.fatal ? F("yes") : F("no"));
-    Serial.print(F(" ts="));
-    Serial.println(t.timestamp_ms);
+    log_line(now_ms, "WHEELS player=%u fatal=%s ts=%lu",
+             (unsigned)t.player_id, t.fatal ? "yes" : "no", (unsigned long)t.timestamp_ms);
 }
 
 void game_fsm_init(uint32_t now_ms)
@@ -167,22 +140,19 @@ void game_fsm_init(uint32_t now_ms)
     pillarFsmInit(now_ms);
     sequencer_reset();
 
-    log_stamp(now_ms);
-    Serial.println(F("game FSM ready, phase IDLE"));
+    log_line(now_ms, "game FSM ready, phase IDLE");
 }
 
 void game_start(uint32_t now_ms)
 {
     if (g_state.phase != PHASE_IDLE)
     {
-        log_stamp(now_ms);
-        Serial.println(F("start ignored: not IDLE (reset first)"));
+        log_line(now_ms, "start ignored: not IDLE (reset first)");
         return;
     }
     if (!all_pillars_down())
     {
-        log_stamp(now_ms);
-        Serial.println(F("start ignored: pillars still coming down"));
+        log_line(now_ms, "start ignored: pillars still coming down");
         return;
     }
 
@@ -207,9 +177,7 @@ void game_on_collision(const CollisionEvent &ev, uint32_t now_ms)
 
     if (ev.player_id >= NUM_PLAYERS)
     {
-        log_stamp(now_ms);
-        Serial.print(F("collision ignored: bad player_id "));
-        Serial.println(ev.player_id);
+        log_line(now_ms, "collision ignored: bad player_id %u", (unsigned)ev.player_id);
         return;
     }
 
@@ -217,37 +185,24 @@ void game_on_collision(const CollisionEvent &ev, uint32_t now_ms)
     update_lockouts(now_ms);
     PlayerState &pl = g_state.players[ev.player_id];
 
-    // Logged before the checks so ignored hits are visible while testing. If
+    // Ignored hits are logged too so they're visible while testing. If
     // Tracking ends up re-reporting every loop while a player overlaps a
-    // pillar, this will flood Serial and should be quietened.
-    log_stamp(now_ms);
-    Serial.print(F("HIT P"));
-    Serial.print(ev.player_id);
-    Serial.print(F(" pillar "));
-    Serial.print(ev.pillar_id);
-    Serial.print(F(" ("));
-    Serial.print(ev.pillar_id < NUM_PILLARS ? pillar_phase_name(g_state.pillars[ev.pillar_id].phase) : "bad id");
-    Serial.print(F(") ts="));
-    Serial.print(ev.timestamp_ms);
-
+    // pillar, this will flood the log and should be quietened.
+    const char *ignored = nullptr;
     if (g_state.phase != PHASE_RUNNING)
-    {
-        Serial.println(F(": ignored, not RUNNING"));
+        ignored = "not RUNNING";
+    else if (!pl.alive)
+        ignored = "already eliminated";
+    else if (pl.locked_out)
+        ignored = "locked out";
+
+    log_line(now_ms, "HIT P%u pillar %u (%s) ts=%lu%s%s",
+             (unsigned)ev.player_id, (unsigned)ev.pillar_id,
+             ev.pillar_id < NUM_PILLARS ? pillar_phase_name(g_state.pillars[ev.pillar_id].phase) : "bad id",
+             (unsigned long)ev.timestamp_ms,
+             ignored ? ": ignored, " : "", ignored ? ignored : "");
+    if (ignored)
         return;
-    }
-    if (!pl.alive)
-    {
-        Serial.println(F(": ignored, already eliminated"));
-        return;
-    }
-    if (pl.locked_out)
-    {
-        Serial.print(F(": ignored, locked out for "));
-        Serial.print(POST_HIT_LOCKOUT_MS - (now_ms - pl.lockout_started_ms));
-        Serial.println(F(" more ms"));
-        return;
-    }
-    Serial.println();
 
     // Pillar phase deliberately not checked: Tracking is the authority, and a
     // pillar can hit a player while RISING, not just EXTENDED.
@@ -272,10 +227,7 @@ void game_on_collision(const CollisionEvent &ev, uint32_t now_ms)
     // is measured end-to-end from the command.
     pl.locked_out = true;
     pl.lockout_started_ms = now_ms;
-    log_stamp(now_ms);
-    Serial.print('P');
-    Serial.print(ev.player_id);
-    Serial.println(F(" locked out"));
+    log_line(now_ms, "P%u locked out", (unsigned)ev.player_id);
 }
 
 void game_fsm_update(uint32_t now_ms)
