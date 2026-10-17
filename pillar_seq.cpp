@@ -9,8 +9,13 @@
 #define SPAWN_GAP_FLOOR_MS 2000 // comes from the total pillar movement time / power cap limit
 #define SPAWN_RAMP_MS 90000
 
+#define FIRST_SPAWN_DELAY_MS 2000 // grace period before the first warning
+
 const uint8_t NO_PILLAR = 0xFF;
 static uint8_t lastPicked = NO_PILLAR;
+
+static uint32_t gameStart_ms = 0; // set in pillarSeqInit
+static uint32_t nextSpawn_ms = 0; // earliest time the next pillar may start
 
 static WarningMode modeForElapsed(uint32_t elapsed_ms) {
     if (elapsed_ms >= MODE_HARD_AFTER_MS) return WARN_HARD;
@@ -63,10 +68,40 @@ static uint8_t pickPillar() {
     return (uint8_t)candidates[rand() % n];
 }
 
-void pillarSeqInit(uint32_t now_ms) {
+// random placeholder logic up for "ankle-breakers" based on SHARED_STATE_H
+static bool shouldSpawnFake(WarningMode mode) {
+    if (mode != WARN_HARD) {
+        return false;
+    } else {
+        return (rand() % 2);
+    }
+}
 
+void pillarSeqInit(uint32_t now_ms) {
+    gameStart_ms = now_ms;
+    nextSpawn_ms = now_ms + FIRST_SPAWN_DELAY_MS;
+    lastPicked = NO_PILLAR;
+    srand(now_ms); // start time varies with when players press start
 }
  
 void pillarSeqUpdate(uint32_t now_ms) {
-
+    if ((u_int32_t)(now_ms - nextSpawn_ms) < 0)
+        return;
+ 
+    if (!capAllowsNewPillar())
+        return;
+ 
+    uint8_t id = pickPillar();
+    if (id == NO_PILLAR)
+        return;
+ 
+    uint32_t elapsed = now_ms - gameStart_ms;
+    WarningMode mode = modeForElapsed(elapsed);
+    bool isFake = shouldSpawnFake(mode);
+ 
+    // only record the pick and schedule the next spawn if the start succeeded.
+    if (pillarStartWarning(id, mode, isFake, now_ms)) {
+        lastPicked = id;
+        nextSpawn_ms = now_ms + spawnIntervalMs(elapsed);
+    }
 }
