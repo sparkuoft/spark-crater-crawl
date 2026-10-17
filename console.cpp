@@ -1,25 +1,21 @@
-#include <Arduino.h>
 #include <ctype.h>
-#include "serial_console.h"
+#include "console.h"
 #include "game_fsm.h"
 #include "pillar_fsm.h"
 #include "debug_log.h"
 
-#define CONSOLE_LINE_MAX 24
-
-static char s_line[CONSOLE_LINE_MAX];
-static uint8_t s_len = 0;
-static bool s_overflow = false;
 static PillarPhase s_last_pillar_phase[NUM_PILLARS];
 
 static void print_help()
 {
-    log_text("commands (end with newline):\n"
+    log_text("commands:\n"
              "  s         start game\n"
              "  r         reset to IDLE\n"
              "  h<p> [n]  fake hit on player p by pillar n (default 0), e.g. h0, h1 3\n"
              "  w<n>      warn + raise pillar n (RUNNING only, stands in for the sequencer)\n"
-             "  ?         print state\n");
+             "  ?         print state\n"
+             "  +<ms>     advance simulated time, e.g. +3000\n"
+             "  q         quit\n");
 }
 
 // Reads an unsigned number at s (skipping leading spaces) and advances s past it.
@@ -64,7 +60,7 @@ static void print_status(uint32_t now_ms)
     log_text("\n");
 }
 
-static void handle_line(const char *line, uint32_t now_ms)
+void console_handle_line(const char *line, uint32_t now_ms)
 {
     const char *args = line + 1;
     uint8_t a = 0;
@@ -137,40 +133,16 @@ static void watch_pillars(uint32_t now_ms)
     }
 }
 
-void serial_console_init(uint32_t now_ms)
+void console_init(uint32_t now_ms)
 {
     for (uint8_t i = 0; i < NUM_PILLARS; i++)
         s_last_pillar_phase[i] = g_state.pillars[i].phase;
 
-    log_line(now_ms, "serial console ready");
+    log_line(now_ms, "console ready");
     print_help();
 }
 
-void serial_console_poll(uint32_t now_ms)
+void console_tick(uint32_t now_ms)
 {
-    // Only drains what's already buffered, so this never waits on input.
-    while (Serial.available() > 0)
-    {
-        char c = (char)Serial.read();
-        if (c == '\r' || c == '\n')
-        {
-            if (!s_overflow && s_len > 0)
-            {
-                s_line[s_len] = '\0';
-                handle_line(s_line, now_ms);
-            }
-            s_len = 0;
-            s_overflow = false;
-        }
-        else if (s_len < CONSOLE_LINE_MAX - 1)
-        {
-            s_line[s_len++] = c;
-        }
-        else
-        {
-            s_overflow = true; // drop the whole line rather than run a truncated command
-        }
-    }
-
     watch_pillars(now_ms);
 }
