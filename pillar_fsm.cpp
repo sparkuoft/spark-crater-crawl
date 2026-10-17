@@ -29,6 +29,13 @@ static uint8_t movingCount()
     return n;
 }
 
+static void sendPillarCommand(uint8_t id, PillarAction action, WarningMode mode, bool isFake)
+{
+    PillarCommand cmd = {id, action, mode, isFake};
+
+    // TODO (wondering how )
+}
+
 // finite state machine
 void pillarFsmUpdate(uint32_t now_ms) {
     
@@ -53,6 +60,7 @@ void pillarFsmUpdate(uint32_t now_ms) {
                 {
                     p.phase = PILLAR_RISING;
                     p.phase_entered_ms = now_ms;
+                    sendPillarCommand(id, ACTION_RAISE, p.warn_mode, false);
                 }
             }
             break;
@@ -68,6 +76,7 @@ void pillarFsmUpdate(uint32_t now_ms) {
             if (elapsed >= PILLAR_HOLD_MS && movingCount() < MAX_SIMULTANEOUS_PILLAR_MOVES) {
                 p.phase = PILLAR_LOWERING;
                 p.phase_entered_ms = now_ms;
+                sendPillarCommand(id, ACTION_LOWER, p.warn_mode, false);
             }
             break;
             
@@ -110,5 +119,6 @@ bool pillarStartWarning(uint8_t id, WarningMode mode, bool isFake, uint32_t now_
     p.warn_mode = mode;
     p.phase_entered_ms = now_ms;
     fake[id] = isFake;
+    sendPillarCommand(id, ACTION_WARN_ONLY, mode, isFake);
     return true;
 }
