@@ -33,7 +33,7 @@ static void sendPillarCommand(uint8_t id, PillarAction action, WarningMode mode,
 {
     PillarCommand cmd = {id, action, mode, isFake};
 
-    // TODO (wondering how )
+    // TODO (wondering how to implement this one since i think it connects to hardware?)
 }
 
 // finite state machine
