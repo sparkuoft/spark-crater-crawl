@@ -9,7 +9,8 @@
  *
  *   s          start a game
  *   r          reset to IDLE
- *   h<p> [n]   fake a hit on player p by pillar n (default 0): "h0", "h1 3"
+ *   h<p> [n]   fake a hit on player p by pillar n (default 0): "h0", "h1 3".
+ *              Only counts if pillar n is EXTENDED, so raise it with w<n> first
  *   w<n>       warn + raise pillar n at the current difficulty. RUNNING only,
  *              stands in for the sequencer while it's a stub
  *   ?          print current state
