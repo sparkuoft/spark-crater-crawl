@@ -10,4 +10,6 @@ void pillarSeqInit(uint32_t now_ms);
 
 void pillarSeqUpdate(uint32_t now_ms);
 
+void pillarSeqReset();
+
 #endif

@@ -83,7 +83,7 @@ void pillarSeqInit(uint32_t now_ms) {
     lastPicked = NO_PILLAR;
     srand(now_ms); // start time varies with when players press start
 }
- 
+
 void pillarSeqUpdate(uint32_t now_ms) {
     if ((u_int32_t)(now_ms - nextSpawn_ms) < 0)
         return;
@@ -105,3 +105,5 @@ void pillarSeqUpdate(uint32_t now_ms) {
         nextSpawn_ms = now_ms + spawnIntervalMs(elapsed);
     }
 }
+
+void pillarSeqReset();
