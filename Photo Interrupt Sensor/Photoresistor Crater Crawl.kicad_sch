@@ -1,0 +1,2064 @@
+(kicad_sch 
+  (version 20260306) 
+  (generator "eeschema") 
+  (generator_version "10.0") 
+  (uuid "9dd4c58f-7b0a-4509-81b7-8202ed815fe8") 
+  (paper "A4") 
+  (title_block 
+    (title "Crater Crawl - Optical Interrupter") 
+    (date "2026-10-11") 
+    (rev "v1.0") 
+    (company "Sparks Design Team") 
+    (comment 1 "David Liu")
+  ) 
+  (lib_symbols 
+    (symbol "Device:R" 
+      (pin_numbers 
+        (hide yes)
+      ) 
+      (pin_names 
+        (offset 0)
+      ) 
+      (exclude_from_sim no) 
+      (in_bom yes) 
+      (on_board yes) 
+      (in_pos_files yes) 
+      (duplicate_pin_numbers_are_jumpers no) 
+      (property "Reference" "R" 
+        (at 2.032 0 90) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Value" "R" 
+        (at 0 0 90) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Footprint" "" 
+        (at -1.778 0 90) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Datasheet" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Description" "Resistor" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_keywords" "R res resistor" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_fp_filters" "R_*" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (symbol "R_0_1" 
+        (rectangle 
+          (start -1.016 -2.54) 
+          (end 1.016 2.54) 
+          (stroke 
+            (width 0.254) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        )
+      ) 
+      (symbol "R_1_1" 
+        (pin passive line 
+          (at 0 3.81 270) 
+          (length 1.27) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        ) 
+        (pin passive line 
+          (at 0 -3.81 90) 
+          (length 1.27) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "2" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+      ) 
+      (embedded_fonts no)
+    ) 
+    (symbol "CraterCrawl:ITR9608-F" 
+      (exclude_from_sim no) 
+      (in_bom yes) 
+      (on_board yes) 
+      (in_pos_files yes) 
+      (duplicate_pin_numbers_are_jumpers no) 
+      (property "Reference" "U" 
+        (at -5.08 5.08 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          ) 
+          (justify left)
+        )
+      ) 
+      (property "Value" "ITR9608-F" 
+        (at 0 -5.08 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Footprint" "CraterCrawl:Everlight_ITR9608-F_EdgeSlot" 
+        (at 0 -6.35 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27) 
+            (italic yes)
+          )
+        )
+      ) 
+      (property "Datasheet" "https://www.everlighteurope.com/custom/files/datasheets/DRX-0000076.pdf" 
+        (at -1.27 6.35 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Description" "Photointerrupter infrared LED with photo IC, -25 to +85 degree Celsius" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_keywords" "Photointerrupter opto interrupter infrared LED fast response time infrared 940nm 5mm gap" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_fp_filters" "*ITR9608*" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (symbol "ITR9608-F_0_0" 
+        (text "A" 
+          (at -4.445 3.175 0) 
+          (effects 
+            (font 
+              (size 0.762 0.762)
+            )
+          )
+        ) 
+        (text "K" 
+          (at -4.445 -1.778 0) 
+          (effects 
+            (font 
+              (size 0.762 0.762)
+            )
+          )
+        ) 
+        (text "E" 
+          (at 4.445 3.175 0) 
+          (effects 
+            (font 
+              (size 0.762 0.762)
+            )
+          )
+        ) 
+        (text "C" 
+          (at 4.445 -1.778 0) 
+          (effects 
+            (font 
+              (size 0.762 0.762)
+            )
+          )
+        )
+      ) 
+      (symbol "ITR9608-F_0_1" 
+        (polyline 
+          (pts 
+            (xy -5.08 3.81) 
+            (xy -5.08 -3.81) 
+            (xy 5.08 -3.81) 
+            (xy 5.08 3.81) 
+            (xy 1.27 3.81) 
+            (xy 1.27 -1.27) 
+            (xy -2.54 -1.27) 
+            (xy -2.54 3.81) 
+            (xy -5.08 3.81)
+          ) 
+          (stroke 
+            (width 0.254) 
+            (type default)
+          ) 
+          (fill 
+            (type background)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -5.08 2.54) 
+            (xy -3.81 2.54) 
+            (xy -3.81 0.635)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -5.08 -2.54) 
+            (xy -3.81 -2.54) 
+            (xy -3.81 -0.635)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -4.445 -0.635) 
+            (xy -3.175 -0.635)
+          ) 
+          (stroke 
+            (width 0.254) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -3.81 -0.635) 
+            (xy -4.445 0.635) 
+            (xy -3.175 0.635) 
+            (xy -3.81 -0.635)
+          ) 
+          (stroke 
+            (width 0.254) 
+            (type default)
+          ) 
+          (fill 
+            (type outline)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -1.778 0.254) 
+            (xy -1.2446 0.762) 
+            (xy -1.2446 0.254) 
+            (xy -0.4826 1.016)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -1.778 -0.762) 
+            (xy -1.2446 -0.254) 
+            (xy -1.2446 -0.762) 
+            (xy -0.4826 0) 
+            (xy -0.9906 -0.254) 
+            (xy -0.7366 -0.508) 
+            (xy -0.4826 0)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy -0.4826 1.016) 
+            (xy -0.9906 0.762) 
+            (xy -0.7366 0.508) 
+            (xy -0.4826 1.016)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 2.54 -0.635) 
+            (xy 4.445 -2.54)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 2.54 -1.905) 
+            (xy 2.54 1.905)
+          ) 
+          (stroke 
+            (width 0.508) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 3.048 1.651) 
+            (xy 3.556 1.143) 
+            (xy 4.064 2.159) 
+            (xy 3.048 1.651)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type outline)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 4.445 2.54) 
+            (xy 2.54 0.635)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type outline)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 4.445 2.54) 
+            (xy 5.08 2.54)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 4.445 -2.54) 
+            (xy 5.08 -2.54)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        )
+      ) 
+      (symbol "ITR9608-F_1_1" 
+        (pin passive line 
+          (at -7.62 2.54 0) 
+          (length 2.54) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        ) 
+        (pin passive line 
+          (at -7.62 -2.54 0) 
+          (length 2.54) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "2" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        ) 
+        (pin open_collector line 
+          (at 7.62 -2.54 180) 
+          (length 2.54) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "3" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        ) 
+        (pin passive line 
+          (at 7.62 2.54 180) 
+          (length 2.54) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "4" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+      ) 
+      (embedded_fonts no)
+    ) 
+    (symbol "power:+5V" 
+      (power global) 
+      (pin_numbers 
+        (hide yes)
+      ) 
+      (pin_names 
+        (offset 0) 
+        (hide yes)
+      ) 
+      (exclude_from_sim no) 
+      (in_bom yes) 
+      (on_board yes) 
+      (in_pos_files yes) 
+      (duplicate_pin_numbers_are_jumpers no) 
+      (property "Reference" "#PWR" 
+        (at 0 -3.81 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Value" "+5V" 
+        (at 0 3.556 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Footprint" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Datasheet" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Description" "Power symbol creates a global label with name \"+5V\"" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_keywords" "global power" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (symbol "+5V_0_1" 
+        (polyline 
+          (pts 
+            (xy -0.762 1.27) 
+            (xy 0 2.54)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 0 2.54) 
+            (xy 0.762 1.27)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (polyline 
+          (pts 
+            (xy 0 0) 
+            (xy 0 2.54)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        )
+      ) 
+      (symbol "+5V_1_1" 
+        (pin power_in line 
+          (at 0 0 90) 
+          (length 0) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+      ) 
+      (embedded_fonts no)
+    ) 
+    (symbol "power:GND" 
+      (power global) 
+      (pin_numbers 
+        (hide yes)
+      ) 
+      (pin_names 
+        (offset 0) 
+        (hide yes)
+      ) 
+      (exclude_from_sim no) 
+      (in_bom yes) 
+      (on_board yes) 
+      (in_pos_files yes) 
+      (duplicate_pin_numbers_are_jumpers no) 
+      (property "Reference" "#PWR" 
+        (at 0 -6.35 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Value" "GND" 
+        (at 0 -3.81 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Footprint" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Datasheet" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Description" "Power symbol creates a global label with name \"GND\" , ground" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_keywords" "global power" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (symbol "GND_0_1" 
+        (polyline 
+          (pts 
+            (xy 0 0) 
+            (xy 0 -1.27) 
+            (xy 1.27 -1.27) 
+            (xy 0 -2.54) 
+            (xy -1.27 -1.27) 
+            (xy 0 -1.27)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        )
+      ) 
+      (symbol "GND_1_1" 
+        (pin power_in line 
+          (at 0 0 270) 
+          (length 0) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+      ) 
+      (embedded_fonts no)
+    ) 
+    (symbol "Connector_Generic:Conn_01x03" 
+      (pin_names 
+        (offset 1.016) 
+        (hide yes)
+      ) 
+      (exclude_from_sim no) 
+      (in_bom yes) 
+      (on_board yes) 
+      (in_pos_files yes) 
+      (duplicate_pin_numbers_are_jumpers no) 
+      (property "Reference" "J" 
+        (at 0 5.08 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Value" "Conn_01x03" 
+        (at 0 -5.08 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Footprint" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Datasheet" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_keywords" "connector" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_fp_filters" "Connector*:*_1x??_*" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (symbol "Conn_01x03_1_1" 
+        (rectangle 
+          (start -1.27 3.81) 
+          (end 1.27 -3.81) 
+          (stroke 
+            (width 0.254) 
+            (type default)
+          ) 
+          (fill 
+            (type background)
+          )
+        ) 
+        (rectangle 
+          (start -1.27 2.667) 
+          (end 0 2.413) 
+          (stroke 
+            (width 0.1524) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (rectangle 
+          (start -1.27 0.127) 
+          (end 0 -0.127) 
+          (stroke 
+            (width 0.1524) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (rectangle 
+          (start -1.27 -2.413) 
+          (end 0 -2.667) 
+          (stroke 
+            (width 0.1524) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        ) 
+        (pin passive line 
+          (at -5.08 2.54 0) 
+          (length 3.81) 
+          (name "Pin_1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        ) 
+        (pin passive line 
+          (at -5.08 0 0) 
+          (length 3.81) 
+          (name "Pin_2" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "2" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        ) 
+        (pin passive line 
+          (at -5.08 -2.54 0) 
+          (length 3.81) 
+          (name "Pin_3" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "3" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+      ) 
+      (embedded_fonts no)
+    ) 
+    (symbol "power:PWR_FLAG" 
+      (power global) 
+      (pin_numbers 
+        (hide yes)
+      ) 
+      (pin_names 
+        (offset 0) 
+        (hide yes)
+      ) 
+      (exclude_from_sim no) 
+      (in_bom yes) 
+      (on_board yes) 
+      (in_pos_files yes) 
+      (duplicate_pin_numbers_are_jumpers no) 
+      (property "Reference" "#FLG" 
+        (at 0 1.905 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Value" "PWR_FLAG" 
+        (at 0 3.81 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Footprint" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Datasheet" "" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "Description" "Special symbol for telling ERC where power comes from" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (property "ki_keywords" "flag power" 
+        (at 0 0 0) 
+        (show_name no) 
+        (do_not_autoplace no) 
+        (hide yes) 
+        (effects 
+          (font 
+            (size 1.27 1.27)
+          )
+        )
+      ) 
+      (symbol "PWR_FLAG_0_0" 
+        (pin power_out line 
+          (at 0 0 90) 
+          (length 0) 
+          (name "" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          ) 
+          (number "1" 
+            (effects 
+              (font 
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+      ) 
+      (symbol "PWR_FLAG_0_1" 
+        (polyline 
+          (pts 
+            (xy 0 0) 
+            (xy 0 1.27) 
+            (xy -1.016 1.905) 
+            (xy 0 2.54) 
+            (xy 1.016 1.905) 
+            (xy 0 1.27)
+          ) 
+          (stroke 
+            (width 0) 
+            (type default)
+          ) 
+          (fill 
+            (type none)
+          )
+        )
+      ) 
+      (embedded_fonts no)
+    )
+  ) 
+  (rectangle 
+    (start 101.6 52.07) 
+    (end 226.06 132.08) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (fill 
+      (type none)
+    ) 
+    (uuid "a844e593-3808-4923-b1fa-276ecab43542")
+  ) 
+  (text "Optical Interrupter - Reference Position Sensor" 
+    (exclude_from_sim no) 
+    (at 153.67 49.53 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      )
+    ) 
+    (uuid "3dc2cf9c-94b5-4f2e-9b31-4789cf7653ac")
+  ) 
+  (wire 
+    (pts 
+      (xy 123.19 66.04) 
+      (xy 123.19 67.31)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "185a5ec3-8cf6-4152-8328-e43836b8e5c7")
+  ) 
+  (wire 
+    (pts 
+      (xy 143.51 74.93) 
+      (xy 148.59 74.93)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "2dfe6562-1e8e-49b3-b556-a0e48ec8d7d7")
+  ) 
+  (wire 
+    (pts 
+      (xy 128.27 74.93) 
+      (xy 123.19 74.93)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "3cd8652f-fac2-4524-ac81-b7c038a08c8b")
+  ) 
+  (wire 
+    (pts 
+      (xy 128.27 80.01) 
+      (xy 123.19 80.01)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "54f708c5-5166-479d-9e2d-3cb37c4d37d6")
+  ) 
+  (wire 
+    (pts 
+      (xy 148.59 81.28) 
+      (xy 148.59 80.01)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "931dc178-b10f-4216-904a-adfd208fc1a3")
+  ) 
+  (wire 
+    (pts 
+      (xy 143.51 80.01) 
+      (xy 148.59 80.01)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "97e77c17-a7fc-457c-bcd5-177e7df41a12")
+  ) 
+  (wire 
+    (pts 
+      (xy 123.19 80.01) 
+      (xy 123.19 92.71)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "b7325b0f-b016-491e-96bf-19d18f976599")
+  ) 
+  (wire 
+    (pts 
+      (xy 148.59 74.93) 
+      (xy 148.59 66.04)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "e240fb17-c7a5-485f-a2f9-3c63ea1fda78")
+  ) 
+  (wire 
+    (pts 
+      (xy 148.59 88.9) 
+      (xy 148.59 92.71)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "f3fb3c63-915c-48ac-8a59-39a45d413efa")
+  ) 
+  (symbol 
+    (lib_id "power:+5V") 
+    (at 148.59 92.71 180) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (fields_autoplaced yes) 
+    (uuid "4f7889b4-6d4a-4f51-86a6-4fe861867299") 
+    (property "Reference" "#PWR04" 
+      (at 148.59 88.9 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Value" "+5V" 
+      (at 148.59 97.79 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Footprint" "" 
+      (at 148.59 92.71 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Datasheet" "" 
+      (at 148.59 92.71 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Power symbol creates a global label with name \"+5V\"" 
+      (at 148.59 92.71 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "1" 
+      (uuid "c7521693-d6de-43c3-8f28-431797628967")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "#PWR04") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (symbol 
+    (lib_id "power:GND") 
+    (at 123.19 92.71 0) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (fields_autoplaced yes) 
+    (uuid "50862965-56ba-4539-812e-730872be2477") 
+    (property "Reference" "#PWR01" 
+      (at 123.19 99.06 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Value" "GND" 
+      (at 123.19 97.79 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Footprint" "" 
+      (at 123.19 92.71 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Datasheet" "" 
+      (at 123.19 92.71 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Power symbol creates a global label with name \"GND\" , ground" 
+      (at 123.19 92.71 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "1" 
+      (uuid "9a8d1f17-cb64-4f4a-b727-59b9cd3235e5")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "#PWR01") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (symbol 
+    (lib_id "CraterCrawl:ITR9608-F") 
+    (at 135.89 77.47 0) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (fields_autoplaced yes) 
+    (uuid "a7a062ab-df5e-484d-97a8-52c069fae97a") 
+    (property "Reference" "U1" 
+      (at 135.89 68.58 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Value" "ITR9608-F" 
+      (at 135.89 71.12 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Footprint" "CraterCrawl:Everlight_ITR9608-F_EdgeSlot" 
+      (at 135.89 83.82 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27) 
+          (italic yes)
+        )
+      )
+    ) 
+    (property "Datasheet" "https://www.everlighteurope.com/custom/files/datasheets/DRX-0000076.pdf" 
+      (at 134.62 71.12 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Photointerrupter infrared LED with photo IC, -25 to +85 degree Celsius" 
+      (at 135.89 77.47 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "4" 
+      (uuid "59caed0b-8754-48bd-9a48-13aa300558bf")
+    ) 
+    (pin "3" 
+      (uuid "acd74e90-697d-45c8-a126-5a22a6110462")
+    ) 
+    (pin "2" 
+      (uuid "6fed3a37-bc10-4286-9abb-2bbe2caf2571")
+    ) 
+    (pin "1" 
+      (uuid "fabfb6f9-4cad-4df3-9f69-91c3fed2cc91")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "U1") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (symbol 
+    (lib_id "power:GND") 
+    (at 148.59 66.04 180) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (fields_autoplaced yes) 
+    (uuid "b188881f-6635-427a-9932-21dbed8ca54a") 
+    (property "Reference" "#PWR03" 
+      (at 148.59 59.69 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Value" "GND" 
+      (at 148.59 60.96 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Footprint" "" 
+      (at 148.59 66.04 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Datasheet" "" 
+      (at 148.59 66.04 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Power symbol creates a global label with name \"GND\" , ground" 
+      (at 148.59 66.04 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "1" 
+      (uuid "23c42413-9d11-4435-8867-646d7f43acd4")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "#PWR03") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (symbol 
+    (lib_id "Device:R") 
+    (at 123.19 71.12 0) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (uuid "c2c344c5-5a25-4b12-a750-1913a5029568") 
+    (property "Reference" "R2" 
+      (at 115.57 69.85 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (justify left)
+      )
+    ) 
+    (property "Value" "330" 
+      (at 115.57 72.39 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (justify left)
+      )
+    ) 
+    (property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" 
+      (at 121.412 71.12 90) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Datasheet" "" 
+      (at 123.19 71.12 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Resistor" 
+      (at 123.19 71.12 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "1" 
+      (uuid "adc8d3b5-5721-48f9-87d4-7f922437cf94")
+    ) 
+    (pin "2" 
+      (uuid "070190d6-fbfb-4677-ba83-f469ad0c7a85")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "R2") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (symbol 
+    (lib_id "Device:R") 
+    (at 148.59 85.09 0) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (fields_autoplaced yes) 
+    (uuid "e6a1b431-5787-49f7-a6e1-f8ad3c233677") 
+    (property "Reference" "R1" 
+      (at 151.13 83.8199 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (justify left)
+      )
+    ) 
+    (property "Value" "1k" 
+      (at 151.13 86.3599 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (justify left)
+      )
+    ) 
+    (property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" 
+      (at 146.812 85.09 90) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Datasheet" "" 
+      (at 148.59 85.09 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Resistor" 
+      (at 148.59 85.09 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "1" 
+      (uuid "7e713be5-6722-4fd8-9b3c-0697232d7481")
+    ) 
+    (pin "2" 
+      (uuid "325b19e2-8c65-477a-8372-47ba421e1970")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "R1") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (symbol 
+    (lib_id "power:+5V") 
+    (at 123.19 66.04 0) 
+    (unit 1) 
+    (body_style 1) 
+    (exclude_from_sim no) 
+    (in_bom yes) 
+    (on_board yes) 
+    (in_pos_files yes) 
+    (dnp no) 
+    (fields_autoplaced yes) 
+    (uuid "f97f6e2a-e554-4400-97fe-bb7e5449f8fa") 
+    (property "Reference" "#PWR02" 
+      (at 123.19 69.85 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Value" "+5V" 
+      (at 123.19 60.96 0) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Footprint" "" 
+      (at 123.19 66.04 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Datasheet" "" 
+      (at 123.19 66.04 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Description" "Power symbol creates a global label with name \"+5V\"" 
+      (at 123.19 66.04 0) 
+      (hide yes) 
+      (show_name no) 
+      (do_not_autoplace no) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (pin "1" 
+      (uuid "1e2bcd03-1761-4700-a895-292dbb5b890d")
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "#PWR02") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (sheet_instances 
+    (path "/" 
+      (page "1")
+    )
+  ) 
+  (embedded_fonts no) 
+  (symbol 
+    (lib_id "Connector_Generic:Conn_01x03") 
+    (at 205.74 80.01 0) 
+    (unit 1) 
+    (in_bom yes) 
+    (on_board yes) 
+    (dnp no) 
+    (uuid "f8ac79fb-cea4-462e-9112-a7ede488bde1") 
+    (property "Reference" "J1" 
+      (at 208.28 69.85 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Value" "Arduino Mega" 
+      (at 208.28 72.39 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        )
+      )
+    ) 
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" 
+      (at 205.74 80.01 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (hide yes)
+      )
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "J1") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (wire 
+    (pts 
+      (xy 180.34 77.47) 
+      (xy 200.66 77.47)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "520a6826-9efd-4655-a28e-e5d233d41bcb")
+  ) 
+  (label "+5V" 
+    (at 180.34 77.47 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left bottom)
+    ) 
+    (uuid "a37dcd23-a1f4-4310-8c6e-52c07ed9e18a")
+  ) 
+  (wire 
+    (pts 
+      (xy 180.34 80.01) 
+      (xy 200.66 80.01)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "0116bd89-562f-469c-b64e-0b5b5b3909da")
+  ) 
+  (label "SENSOR_OUT" 
+    (at 180.34 80.01 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left bottom)
+    ) 
+    (uuid "ecd890e6-72eb-43e6-97d1-33aadee7fcb3")
+  ) 
+  (wire 
+    (pts 
+      (xy 180.34 82.55) 
+      (xy 200.66 82.55)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "c2a8223e-1b42-4ad3-bcda-888e1eb32811")
+  ) 
+  (label "GND" 
+    (at 180.34 82.55 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left bottom)
+    ) 
+    (uuid "a1cd360f-30bb-4298-81b2-cfc2ba99da92")
+  ) 
+  (wire 
+    (pts 
+      (xy 148.59 80.01) 
+      (xy 151.13 80.01)
+    ) 
+    (stroke 
+      (width 0) 
+      (type default)
+    ) 
+    (uuid "ef1cadde-b660-407a-b90f-63bbf1656f63")
+  ) 
+  (label "SENSOR_OUT" 
+    (at 151.13 80.01 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left bottom)
+    ) 
+    (uuid "f61344fd-8559-434b-9cd3-2a8e7faa5a65")
+  ) 
+  (junction 
+    (at 148.59 80.01) 
+    (diameter 0) 
+    (color 0 0 0 0) 
+    (uuid "892de7a2-29cf-4656-ab5a-8de3aaa7b7bf")
+  ) 
+  (symbol 
+    (lib_id "power:PWR_FLAG") 
+    (at 180.34 66.04 0) 
+    (unit 1) 
+    (in_bom yes) 
+    (on_board yes) 
+    (dnp no) 
+    (uuid "3383760c-3d3a-4e95-b705-d2eab78739fb") 
+    (property "Reference" "#FLG01" 
+      (at 182.88 60.96000000000001 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (hide yes)
+      )
+    ) 
+    (property "Value" "PWR_FLAG" 
+      (at 182.88 63.50000000000001 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (hide yes)
+      )
+    ) 
+    (property "Footprint" "" 
+      (at 180.34 66.04 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (hide yes)
+      )
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "#FLG01") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (label "+5V" 
+    (at 180.34 66.04 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left bottom)
+    ) 
+    (uuid "925aff23-521c-4242-a76b-26af8eb625c0")
+  ) 
+  (text "J1: 1 = +5V, 2 = SENSOR_OUT, 3 = GND\nConnect pin 2 to a Mega digital input.\nUse a shared ground with the Mega." 
+    (at 175.26 93.98 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left top)
+    ) 
+    (uuid "91ae3911-71e7-41e9-8797-888da7314c3c")
+  ) 
+  (text "R1 = 1 kohm pull-up; R2 = 330 ohm LED current limit.\nLED current approximately 11.5 mA at 5 V (Vf approximately 1.2 V).\nBeam blocked: output rises toward +5 V.\nDigital LOW is NOT guaranteed with 1k: bench-check clear/blocked levels\nbefore use; adjust pull-up or add signal conditioning if needed." 
+    (at 109.22 110.49 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left top)
+    ) 
+    (uuid "c96f2c93-5bce-47d6-afa7-f395bde8274b")
+  ) 
+  (symbol 
+    (lib_id "power:PWR_FLAG") 
+    (at 198.12 66.04 0) 
+    (unit 1) 
+    (in_bom yes) 
+    (on_board yes) 
+    (dnp no) 
+    (uuid "7a797a54-01f3-4b5e-b735-d7d415543cae") 
+    (property "Reference" "#FLG02" 
+      (at 198.12 66.04 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (hide yes)
+      )
+    ) 
+    (property "Value" "PWR_FLAG" 
+      (at 198.12 66.04 0) 
+      (effects 
+        (font 
+          (size 1.27 1.27)
+        ) 
+        (hide yes)
+      )
+    ) 
+    (instances 
+      (project "Photoresistor Crater Crawl" 
+        (path "/9dd4c58f-7b0a-4509-81b7-8202ed815fe8" 
+          (reference "#FLG02") 
+          (unit 1)
+        )
+      )
+    )
+  ) 
+  (label "GND" 
+    (at 198.12 66.04 0) 
+    (effects 
+      (font 
+        (size 1.27 1.27)
+      ) 
+      (justify left bottom)
+    ) 
+    (uuid "cafb5b40-840b-4fe9-9489-63ec70e540cf")
+  )
+)

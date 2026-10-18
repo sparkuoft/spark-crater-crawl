@@ -1,9 +1,7 @@
 #include "pillar_seq.h"
+#include "game_fsm.h" // game_difficulty(): GL's single source of truth for difficulty
 
 // placeholder values
-
-#define MODE_NORMAL_AFTER_MS 15000
-#define MODE_HARD_AFTER_MS 30000
 
 #define SPAWN_GAP_START_MS 3500
 #define SPAWN_GAP_FLOOR_MS 2000 // comes from the total pillar movement time / power cap limit
@@ -16,15 +14,7 @@ static uint8_t lastPicked = NO_PILLAR;
 
 static uint32_t gameStart_ms = 0; // set in pillarSeqInit
 static uint32_t nextSpawn_ms = 0; // earliest time the next pillar may start
-
-static WarningMode modeForElapsed(uint32_t elapsed_ms)
-{
-    if (elapsed_ms >= MODE_HARD_AFTER_MS)
-        return WARN_HARD;
-    if (elapsed_ms >= MODE_NORMAL_AFTER_MS)
-        return WARN_NORMAL;
-    return WARN_EASY;
-}
+static bool started = false;      // false until the first update of a round calls pillarSeqInit
 
 static uint32_t spawnIntervalMs(uint32_t elapsed_ms)
 {
@@ -99,10 +89,18 @@ void pillarSeqInit(uint32_t now_ms)
     nextSpawn_ms = now_ms + FIRST_SPAWN_DELAY_MS;
     lastPicked = NO_PILLAR;
     srand(now_ms); // start time varies with when players press start
+    started = true;
 }
 
-void pillarSeqUpdate(uint32_t now_ms) {
-    if ((u_int32_t)(now_ms - nextSpawn_ms) < 0)
+void pillarSeqUpdate(uint32_t now_ms)
+{
+    // game_fsm only calls pillarSeqReset() at round start, so the first update
+    // of each round is where the sequencer picks up its start time.
+    if (!started)
+        pillarSeqInit(now_ms);
+
+    // Signed cast so this stays correct when millis() wraps (~49 days).
+    if ((int32_t)(now_ms - nextSpawn_ms) < 0)
         return;
 
     if (!capAllowsNewPillar())
@@ -113,7 +111,7 @@ void pillarSeqUpdate(uint32_t now_ms) {
         return;
 
     uint32_t elapsed = now_ms - gameStart_ms;
-    WarningMode mode = modeForElapsed(elapsed);
+    WarningMode mode = game_difficulty();
     bool isFake = shouldSpawnFake(mode);
 
     // only record the pick and schedule the next spawn if the start succeeded.
@@ -124,4 +122,10 @@ void pillarSeqUpdate(uint32_t now_ms) {
     }
 }
 
-void pillarSeqReset();
+// Called by game_fsm at init, at round start, and when pillars are lowered.
+// The next pillarSeqUpdate re-initialises with that moment as the start time.
+void pillarSeqReset()
+{
+    started = false;
+    lastPicked = NO_PILLAR;
+}

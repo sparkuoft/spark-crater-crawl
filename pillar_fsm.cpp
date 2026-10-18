@@ -1,9 +1,12 @@
 #include "pillar_fsm.h"
-#include <iostream>
-using namespace std;
+#include "debug_log.h"
+
+// Per-pillar flag: true if the current warning is an ankle-breaker (no rise).
+// Internal to the pillar FSM, so it lives here rather than in shared_state.h.
+static bool fake[NUM_PILLARS];
 
 // placeholder
-#define PILLAR_HOLD_MS 1000 // should this be in the header file (shared or pillar)? is there a reason it isn't?
+#define PILLAR_HOLD_MS 1000UL // should this be in the header file (shared or pillar)? is there a reason it isn't?
 
 static uint32_t warnDurationMs(WarningMode mode)
 {
@@ -32,11 +35,35 @@ static uint8_t movingCount()
     return n;
 }
 
-static void sendPillarCommand(uint8_t id, PillarAction action, WarningMode mode, bool isFake)
+static const char *actionName(PillarAction a)
+{
+    switch (a)
+    {
+    case ACTION_NONE:
+        return "NONE";
+    case ACTION_RAISE:
+        return "RAISE";
+    case ACTION_LOWER:
+        return "LOWER";
+    case ACTION_WARN_ONLY:
+        return "WARN";
+    }
+    return "?";
+}
+
+// Outbound to Pillars (P|E). No transport agreed yet, so for now this only
+// logs the payload (same approach as send_wheels_trigger in game_fsm.cpp).
+static void sendPillarCommand(const PillarCommand &cmd, uint32_t now_ms)
+{
+    log_line(now_ms, "PILLAR CMD pillar=%u action=%s mode=%s fake=%s",
+             (unsigned)cmd.pillar_id, actionName(cmd.action),
+             warning_mode_name(cmd.warn_mode), cmd.is_fake ? "yes" : "no");
+}
+
+static void sendPillarCommand(uint8_t id, PillarAction action, WarningMode mode, bool isFake, uint32_t now_ms)
 {
     PillarCommand cmd = {id, action, mode, isFake};
-    // TODO (wondering how to implement this one since i think it connects to hardware?)
-    cout << "Pillar Command: " << id << action << mode << isFake << "sent" << endl;
+    sendPillarCommand(cmd, now_ms);
 }
 
 // finite state machine
@@ -65,7 +92,7 @@ void pillarFsmUpdate(uint32_t now_ms)
                 {
                     p.phase = PILLAR_RISING;
                     p.phase_entered_ms = now_ms;
-                    sendPillarCommand(id, ACTION_RAISE, p.warn_mode, false);
+                    sendPillarCommand(id, ACTION_RAISE, p.warn_mode, false, now_ms);
                 }
             }
             break;
@@ -78,12 +105,15 @@ void pillarFsmUpdate(uint32_t now_ms)
             }
             break;
 
-        case PILLAR_EXTENDED: // discuss with Antoine how to make sure the pillar doesn't get stuck in extended state due to power cap
+        // Can't get stuck here: pillar_seq caps ALL non-IDLE pillars at
+        // MAX_SIMULTANEOUS_PILLAR_MOVES, so while this one is EXTENDED at most
+        // cap-1 others can be moving. Loosening that cap would reopen this.
+        case PILLAR_EXTENDED:
             if (elapsed >= PILLAR_HOLD_MS && movingCount() < MAX_SIMULTANEOUS_PILLAR_MOVES)
             {
                 p.phase = PILLAR_LOWERING;
                 p.phase_entered_ms = now_ms;
-                sendPillarCommand(id, ACTION_LOWER, p.warn_mode, false);
+                sendPillarCommand(id, ACTION_LOWER, p.warn_mode, false, now_ms);
             }
             break;
 
@@ -127,6 +157,6 @@ bool pillarStartWarning(uint8_t id, WarningMode mode, bool isFake, uint32_t now_
     p.warn_mode = mode;
     p.phase_entered_ms = now_ms;
     fake[id] = isFake;
-    sendPillarCommand(id, ACTION_WARN_ONLY, mode, isFake);
+    sendPillarCommand(id, ACTION_WARN_ONLY, mode, isFake, now_ms);
     return true;
 }

@@ -6,7 +6,7 @@
  * Spark Design Club, 2026-2027
  *
  * Owner: Antoine Tabet (Game Logic / GL|E)
- * Last updated: 2026-08-11
+ * Last updated: 2026-10-13
  *
  * ONE WRITER PER FIELD. Every field below is tagged with the subteam that
  * writes it; everyone else reads only. If you need to write a field you don't
@@ -59,6 +59,14 @@
  * not a measured electrical ceiling. The sequencer MUST respect it regardless:
  * difficulty scaling may never command a 4th pillar into motion. */
 #define MAX_SIMULTANEOUS_PILLAR_MOVES 3 /* PROVISIONAL */
+
+/* Difficulty progression. PROVISIONAL -- GL (Antoine), 2026-10-13.
+ * Placeholder values pending playtesting. Measured from the moment the round
+ * enters PHASE_RUNNING. Difficulty only steps up within a round:
+ * WARN_EASY until NORMAL_AT, WARN_NORMAL until HARD_AT, then WARN_HARD until
+ * the round ends. */
+#define DIFFICULTY_NORMAL_AT_MS 30000UL /* PROVISIONAL */
+#define DIFFICULTY_HARD_AT_MS 60000UL   /* PROVISIONAL */
 
 /* ======================================================================
  * ENUMS
@@ -191,7 +199,5 @@ struct SharedState
 };
 
 extern SharedState g_state;
-
-static bool fake[NUM_PILLARS];
 
 #endif /* SHARED_STATE_H */
