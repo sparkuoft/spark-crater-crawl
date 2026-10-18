@@ -192,4 +192,6 @@ struct SharedState
 
 extern SharedState g_state;
 
+static bool fake[NUM_PILLARS];
+
 #endif /* SHARED_STATE_H */
