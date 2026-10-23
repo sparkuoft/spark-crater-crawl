@@ -16,8 +16,8 @@
  *              active (the same limit the sequencer keeps)
  *   ?          print current state
  *
- * console_tick also reports every pillar phase change (read-only), so pillars
- * coming down after a round can be watched. */
+ * console_tick prints the demo view, read-only: a 3-2-1 countdown, a one-line
+ * arena whenever a pillar or player changes, and a game-over summary. */
 void console_init(uint32_t now_ms);
 void console_handle_line(const char *line, uint32_t now_ms);
 void console_tick(uint32_t now_ms); /* call every loop */
