@@ -13,10 +13,25 @@ static void print_help()
              "  r         reset to IDLE\n"
              "  h<p> [n]  fake hit on player p by pillar n (default 0), e.g. h0, h1 3\n"
              "            (only counts if pillar n is EXTENDED: raise it with w<n> first)\n"
-             "  w<n>      warn + raise pillar n (RUNNING only, stands in for the sequencer)\n"
+             "  w<n>      warn + raise pillar n now (RUNNING only, at most %d active pillars,\n"
+             "            same limit as the sequencer)\n"
              "  ?         print state\n"
              "  +<ms>     advance simulated time, e.g. +3000\n"
-             "  q         quit\n");
+             "  q         quit\n",
+             MAX_SIMULTANEOUS_PILLAR_MOVES);
+}
+
+// Pillars out of IDLE. The sequencer keeps this below the motion cap so no
+// pillar ever waits for a motor slot; manual warnings follow the same rule.
+static uint8_t active_pillars()
+{
+    uint8_t n = 0;
+    for (uint8_t i = 0; i < NUM_PILLARS; i++)
+    {
+        if (g_state.pillars[i].phase != PILLAR_IDLE)
+            n++;
+    }
+    return n;
 }
 
 // Reads an unsigned number at s (skipping leading spaces) and advances s past it.
@@ -102,6 +117,11 @@ void console_handle_line(const char *line, uint32_t now_ms)
         if (g_state.phase != PHASE_RUNNING)
         {
             log_line(now_ms, "warn ignored: not RUNNING");
+            break;
+        }
+        if (active_pillars() >= MAX_SIMULTANEOUS_PILLAR_MOVES)
+        {
+            log_line(now_ms, "warn ignored: %u pillars already active", (unsigned)active_pillars());
             break;
         }
         if (!pillarStartWarning(a, game_difficulty(), false, now_ms))
