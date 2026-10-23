@@ -11,14 +11,25 @@ static void print_help()
     log_text("commands:\n"
              "  s         start game\n"
              "  r         reset to IDLE\n"
-             "  h<p> [n]  fake hit on player p by pillar n (default 0), e.g. h0, h1 3\n"
-             "            (only counts if pillar n is EXTENDED: raise it with w<n> first)\n"
+             "  h<p> [n]  fake a Tracking hit on player p by pillar n, e.g. h1 3\n"
+             "            (no n: uses a pillar that's up. Only EXTENDED pillars count)\n"
              "  w<n>      warn + raise pillar n now (RUNNING only, at most %d active pillars,\n"
              "            same limit as the sequencer)\n"
              "  ?         print state\n"
              "  +<ms>     advance simulated time, e.g. +3000\n"
              "  q         quit\n",
              MAX_SIMULTANEOUS_PILLAR_MOVES);
+}
+
+// First EXTENDED pillar, or 0 if none is up (the hit is then ignored).
+static uint8_t raised_pillar()
+{
+    for (uint8_t i = 0; i < NUM_PILLARS; i++)
+    {
+        if (g_state.pillars[i].phase == PILLAR_EXTENDED)
+            return i;
+    }
+    return 0;
 }
 
 // Pillars out of IDLE. The sequencer keeps this below the motion cap so no
@@ -99,9 +110,12 @@ void console_handle_line(const char *line, uint32_t now_ms)
             print_help();
             break;
         }
+        // Stands in for Tracking's report. Without a pillar number, use one that's
+        // up: a pillar only stays EXTENDED for about a second, too short to read
+        // its number and type it in live mode.
         CollisionEvent ev;
         ev.player_id = a;
-        ev.pillar_id = parse_uint8(args, b) ? b : 0;
+        ev.pillar_id = parse_uint8(args, b) ? b : raised_pillar();
         ev.hit = true;
         ev.timestamp_ms = now_ms;
         game_on_collision(ev, now_ms);

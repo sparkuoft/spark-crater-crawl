@@ -9,8 +9,8 @@
  *
  *   s          start a game
  *   r          reset to IDLE
- *   h<p> [n]   fake a hit on player p by pillar n (default 0): "h0", "h1 3".
- *              Only counts if pillar n is EXTENDED, so raise it with w<n> first
+ *   h<p> [n]   fake a Tracking hit on player p by pillar n: "h1 3". With no n
+ *              it uses a pillar that's up. Only EXTENDED pillars count
  *   w<n>       warn + raise pillar n now, at the current difficulty. RUNNING
  *              only, and refused once MAX_SIMULTANEOUS_PILLAR_MOVES pillars are
  *              active (the same limit the sequencer keeps)
