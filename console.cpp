@@ -256,11 +256,11 @@ static void print_summary(uint32_t now_ms)
 
     log_line(now_ms, "=== GAME OVER ===");
     if (alive_count == 1)
-        log_line(now_ms, "  P%u wins after %lu.%lus, reached %s, %u pillars raised", survivor,
+        log_line(now_ms, "  P%u wins after %lu.%lus, reached %s, pillars raised: %u", survivor,
                  (unsigned long)(t / 1000), (unsigned long)(t % 1000 / 100),
                  warning_mode_name(game_difficulty()), s_pillars_raised);
     else
-        log_line(now_ms, "  draw after %lu.%lus, reached %s, %u pillars raised",
+        log_line(now_ms, "  draw after %lu.%lus, reached %s, pillars raised: %u",
                  (unsigned long)(t / 1000), (unsigned long)(t % 1000 / 100),
                  warning_mode_name(game_difficulty()), s_pillars_raised);
     log_line(now_ms, "  type r to reset, then s to play again");
