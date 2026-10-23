@@ -23,9 +23,10 @@ void game_fsm_update(uint32_t now_ms); /* call every loop */
 void game_start(uint32_t now_ms); /* IDLE -> COUNTDOWN. Ignored unless IDLE with all pillars down */
 void game_reset(uint32_t now_ms); /* any phase -> IDLE, and starts bringing pillars down */
 
-/* Collision report from Tracking (T|E). Only counts while RUNNING, and is
- * ignored for a player who is locked out or already eliminated. Forwards
- * player_id + timestamp + fatal to Wheels; the pillar stays on the GL side. */
+/* Collision report from Tracking (T|E). Only counts while RUNNING and from an
+ * EXTENDED pillar (per shared_state.h), and is ignored for a player who is
+ * locked out or already eliminated. Forwards player_id + timestamp + fatal to
+ * Wheels; the pillar stays on the GL side. */
 void game_on_collision(const CollisionEvent &ev, uint32_t now_ms);
 
 WarningMode game_difficulty();

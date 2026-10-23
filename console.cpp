@@ -12,6 +12,7 @@ static void print_help()
              "  s         start game\n"
              "  r         reset to IDLE\n"
              "  h<p> [n]  fake hit on player p by pillar n (default 0), e.g. h0, h1 3\n"
+             "            (only counts if pillar n is EXTENDED: raise it with w<n> first)\n"
              "  w<n>      warn + raise pillar n (RUNNING only, stands in for the sequencer)\n"
              "  ?         print state\n"
              "  +<ms>     advance simulated time, e.g. +3000\n"

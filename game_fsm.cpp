@@ -1,6 +1,6 @@
 #include "game_fsm.h"
 #include "pillar_fsm.h"
-#include "sequencer.h"
+#include "pillar_seq.h"
 #include "debug_log.h"
 
 static_assert(DIFFICULTY_NORMAL_AT_MS < DIFFICULTY_HARD_AT_MS, "difficulty thresholds out of order");
@@ -109,7 +109,7 @@ static bool all_pillars_down()
 // six down at once could break the power cap.
 static void lower_all_pillars(uint32_t now_ms)
 {
-    sequencer_reset();
+    pillarSeqReset();
 
     for (uint8_t i = 0; i < NUM_PILLARS; i++)
     {
@@ -138,7 +138,7 @@ void game_fsm_init(uint32_t now_ms)
     reset_players();
     s_difficulty = WARN_EASY;
     pillarFsmInit(now_ms);
-    sequencer_reset();
+    pillarSeqReset();
 
     log_line(now_ms, "game FSM ready, phase IDLE");
 }
@@ -195,6 +195,10 @@ void game_on_collision(const CollisionEvent &ev, uint32_t now_ms)
         ignored = "already eliminated";
     else if (pl.locked_out)
         ignored = "locked out";
+    else if (ev.pillar_id >= NUM_PILLARS)
+        ignored = "bad pillar_id";
+    else if (g_state.pillars[ev.pillar_id].phase != PILLAR_EXTENDED)
+        ignored = "pillar not EXTENDED"; // shared_state.h: collision detection only ever tests EXTENDED
 
     log_line(now_ms, "HIT P%u pillar %u (%s) ts=%lu%s%s",
              (unsigned)ev.player_id, (unsigned)ev.pillar_id,
@@ -204,8 +208,6 @@ void game_on_collision(const CollisionEvent &ev, uint32_t now_ms)
     if (ignored)
         return;
 
-    // Pillar phase deliberately not checked: Tracking is the authority, and a
-    // pillar can hit a player while RISING, not just EXTENDED.
     s_hits[ev.player_id]++;
 
     WheelsTrigger t;
@@ -244,7 +246,7 @@ void game_fsm_update(uint32_t now_ms)
     case PHASE_COUNTDOWN:
         if (in_phase_ms >= COUNTDOWN_MS)
         {
-            sequencer_reset();
+            pillarSeqReset();
             s_round_started_ms = now_ms;
             s_difficulty = WARN_EASY;
             enter_phase(PHASE_RUNNING, now_ms);
@@ -260,7 +262,7 @@ void game_fsm_update(uint32_t now_ms)
             break;
         }
         update_difficulty(now_ms);
-        sequencer_update(now_ms, s_difficulty);
+        pillarSeqUpdate(now_ms);
         break;
 
     case PHASE_PLAYER_ELIMINATED:
