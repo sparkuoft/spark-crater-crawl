@@ -29,7 +29,8 @@ static void print_help()
              "  w<n>      warn + raise pillar n now (RUNNING only, at most %d active pillars,\n"
              "            same limit as the sequencer)\n"
              "  ?         print state\n"
-             "  +<ms>     advance simulated time, e.g. +3000\n"
+             "  +<ms>     advance simulated time, e.g. +3000 (live mode: wait that long)\n"
+             "  # text    comment, printed as-is (for demo scripts)\n"
              "  q         quit\n",
              MAX_SIMULTANEOUS_PILLAR_MOVES);
 }

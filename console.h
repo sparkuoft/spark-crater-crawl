@@ -4,8 +4,8 @@
 #include <stdint.h>
 
 /* Test console: typed commands standing in for hardware that doesn't exist
- * yet. The driver (main.cpp) reads whole lines, handles +<ms> and q itself,
- * and passes everything else here.
+ * yet. The driver (main.cpp) reads whole lines, handles +<ms>, # comments and
+ * q itself, and passes everything else here.
  *
  *   s          start a game
  *   r          reset to IDLE
