@@ -5,6 +5,8 @@
 
 static int16_t signed_gap(uint16_t first, uint16_t second)
 {
+    /* Magnitude is separation; sign identifies which side player 1 is on.
+     * Example: 3580 -> 20 gives +40, crossing zero in the positive direction. */
     int32_t gap = (int32_t)second - (int32_t)first;
     if (gap > 1800) gap -= 3600;
     if (gap < -1800) gap += 3600;
@@ -19,6 +21,8 @@ static bool valid_direction(CharacterDirection direction)
 
 CharacterControllerConfig character_controller_default_config(void)
 {
+    /* Callbacks remain NULL: detection alone never changes motor direction.
+     * GL/Wheels must explicitly select and wire a response policy. */
     CharacterControllerConfig config = {0};
     config.enter_x10 = 50U;
     config.release_x10 = 100U;
@@ -39,6 +43,7 @@ bool character_controller_init(CharacterController *c,
         || (config->choose_response != NULL
             && (config->apply_response == NULL || config->read_direction == NULL)))
         return false;
+    /* Store references to the two existing modules, not copies of their state. */
     memset(c, 0, sizeof(*c));
     c->players[0] = first;
     c->players[1] = second;
@@ -53,6 +58,9 @@ static void report_collision(CharacterController *c, uint32_t now_ms,
     CharacterPairCollision event = {0};
     CharacterDirection outgoing[2] = {CHARACTER_STOPPED, CHARACTER_STOPPED};
     unsigned int i;
+    /* Capture positions and both incoming directions before any motor command.
+     * Reversing one player before reading the other would mix before/after
+     * states and could produce the wrong response for same-direction catch-up. */
     event.is_hit = true;
     event.hit_ms = now_ms;
     event.separation_x10 = separation;
@@ -71,8 +79,14 @@ static void report_collision(CharacterController *c, uint32_t now_ms,
         }
         character_record_character_collision(c->players[i], now_ms);
     }
+    /* Preserve the oldest unread pair notification. Event overflow is exposed
+     * as a counter; it does not block a configured response to a new encounter. */
     if (c->pending_event.is_hit) ++c->dropped_events;
     else c->pending_event = event;
+    /* Optional immediate response: exactly ONE call carries BOTH players.
+     * This occurs inside controller_update, before GL reads pillar events.
+     * For GL-controlled hit priority, leave choose_response NULL and decide
+     * after consuming events instead; do not apply both response routes. */
     if (event.directions_valid && c->config.choose_response != NULL
         && c->config.choose_response(c->config.context, &event, outgoing)
         && valid_direction(outgoing[0]) && valid_direction(outgoing[1]))
@@ -88,14 +102,21 @@ void character_controller_update(CharacterController *c, uint32_t now_ms,
     bool recalibrated;
     unsigned int i;
     if (c == NULL || !c->initialized) return;
+    /* Tracking still runs in IDLE/homing/game-over, even if pair detection is
+     * disabled. GL must keep consuming pillar events rather than save them
+     * for a later RUNNING phase. This function does not call the game FSM. */
     for (i = 0U; i < 2U; ++i) character_update(c->players[i], now_ms);
     first_time = c->players[0]->sampled_ms;
     second_time = c->players[1]->sampled_ms;
+    /* Fresh individual reads are insufficient if taken too far apart: comparing
+     * different moments can create a false overlap between moving players. */
     c->pair_valid = character_angle_is_valid(c->players[0])
         && character_angle_is_valid(c->players[1])
         && (first_time - second_time <= c->config.max_pair_sample_skew_ms
             || second_time - first_time <= c->config.max_pair_sample_skew_ms);
     if (!collisions_enabled || !c->pair_valid) {
+        /* Discard approach history, not pending events. On recovery the startup
+         * overlap policy applies again. The caller owns draining old events. */
         c->baseline_seen = false;
         c->armed = false;
         return;
@@ -114,6 +135,9 @@ void character_controller_update(CharacterController *c, uint32_t now_ms,
             c->armed = c->config.detect_initial_overlap || separation > c->config.release_x10;
         else if (separation > c->config.release_x10)
             c->armed = true;
+        /* Hysteresis: trigger at the smaller boundary, then latch until the
+         * larger boundary is crossed. Holding close cannot cause oscillating
+         * direction commands on every update. */
         if (c->armed && separation <= c->config.enter_x10) {
             report_collision(c, now_ms, separation, gap);
             c->armed = false;
@@ -128,6 +152,8 @@ void character_controller_update(CharacterController *c, uint32_t now_ms,
 
 CharacterPairCollision character_controller_read_collision(CharacterController *c)
 {
+    /* Consuming read for GL; false is_hit means no new decision is needed.
+     * A timestamp/position retained in an empty result is not a fresh event. */
     CharacterPairCollision event = {0};
     if (c != NULL && c->initialized) {
         event = c->pending_event;
@@ -144,6 +170,8 @@ bool character_response_separate(void *context, const CharacterPairCollision *ev
     (void)context;
     if (event == NULL || outgoing == NULL || !event->is_hit || !event->directions_valid)
         return false;
+    /* Exact coincidence has no current left/right ordering. Reuse the prior
+     * ordering if available; otherwise decline rather than choose randomly. */
     gap = event->signed_gap_x10 != 0 ? event->signed_gap_x10 : event->previous_signed_gap_x10;
     if (gap == 0 || gap == 1800 || gap == -1800) return false;
     /* Direction ordering identifies head-on/separating motion without speed
@@ -151,6 +179,9 @@ bool character_response_separate(void *context, const CharacterPairCollision *ev
     closing = ((int)event->incoming[0] - (int)event->incoming[1]) * (gap > 0 ? 1 : -1);
     if (closing < 0 || (closing == 0 && (!event->approach_known || !event->approaching)))
         return false;
+    /* If player 1 is ahead in the positive direction, send player 0 negative
+     * and player 1 positive. These are proposed directions, not motor writes;
+     * GL/Wheels still owns whether/when the paired command is allowed. */
     outgoing[0] = gap > 0 ? CHARACTER_NEGATIVE : CHARACTER_POSITIVE;
     outgoing[1] = gap > 0 ? CHARACTER_POSITIVE : CHARACTER_NEGATIVE;
     return true;
