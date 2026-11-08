@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <string.h>
 
+/* Helpers marked static are private to this source file. GL should call the
+ * public header API, not recreate these calculations or mutate module fields. */
+
+/* C's remainder can be negative; add one turn so -10 becomes 3590 (359 deg). */
 static uint16_t wrap_angle(int32_t angle)
 {
     angle %= (int32_t)CHARACTER_TURN_X10;
@@ -12,6 +16,7 @@ static uint16_t wrap_angle(int32_t angle)
 
 uint16_t character_angular_distance(uint16_t first_x10, uint16_t second_x10)
 {
+    /* Pick the shorter arc, including when the positions straddle zero. */
     uint16_t difference = first_x10 > second_x10
         ? (uint16_t)(first_x10 - second_x10)
         : (uint16_t)(second_x10 - first_x10);
@@ -21,12 +26,17 @@ uint16_t character_angular_distance(uint16_t first_x10, uint16_t second_x10)
 
 static uint16_t relative_angle(const CharacterModule *c, uint16_t raw)
 {
+    /* Offset is an absolute reference reading, not accumulated movement.
+     * Example with sign=+1: raw=500, offset=50 -> angle=450 (45 degrees).
+     * sign=-1 corrects a reversed encoder convention for the shared frame. */
     return wrap_angle(((int32_t)raw - (int32_t)c->reference_offset_x10)
                       * c->config.encoder_sign);
 }
 
 CharacterConfig character_default_config(void)
 {
+    /* Zero initialization leaves hardware callbacks unset. The adapter must
+     * supply them; init rejects an incomplete hardware configuration. */
     CharacterConfig config = {0};
     config.encoder_sign = 1;
     config.reference_rearm_x10 = 450U;
@@ -63,6 +73,8 @@ bool character_init(CharacterModule *c, const CharacterConfig *config)
     for (i = 0U; i < config->pillar_count; ++i) {
         if (config->pillar_angles_x10[i] >= CHARACTER_TURN_X10) return false;
     }
+    /* Only reset after all checks pass. No motor/sensor operations belong in
+     * initialization; homing is a separate explicit request from the caller. */
     memset(c, 0, sizeof(*c));
     c->config = *config;
     c->initialized = true;
@@ -72,6 +84,9 @@ bool character_init(CharacterModule *c, const CharacterConfig *config)
 
 static bool take_reference(CharacterModule *c, uint32_t *crossing_ms)
 {
+    /* A 32-bit timestamp can tear on an 8-bit Mega if an interrupt modifies it
+     * halfway through a read. Copy and clear the mailbox with interrupts
+     * protected, then restore the prior state before doing any hardware I/O. */
     CharacterHardware *hw = &c->config.hardware;
     uint8_t previous = hw->critical_enter(hw->context);
     bool pending = c->reference_pending;
@@ -108,6 +123,8 @@ bool character_start_homing(CharacterModule *c, uint32_t now_ms)
         return false;
     }
     c->reference_input_error = false;
+    /* Starting inside the optical flag is not a known crossing point. update
+     * must observe a clear sensor before a later activation can establish zero. */
     c->reference_armed = !active;
     c->homing_started_ms = now_ms;
     c->calibration = CHARACTER_HOMING;
@@ -117,6 +134,8 @@ bool character_start_homing(CharacterModule *c, uint32_t now_ms)
         c->reference_armed = false;
         return false;
     }
+    /* Movement has been requested; update will finish calibration or time out.
+     * There is no delay/wait loop here, so the other player can still update. */
     return true;
 }
 
@@ -132,6 +151,7 @@ void character_cancel_homing(CharacterModule *c)
 
 static bool near_time(uint32_t first, uint32_t second, uint32_t tolerance)
 {
+    /* Check both orders using unsigned arithmetic, including clock rollover. */
     return first - second <= tolerance || second - first <= tolerance;
 }
 
@@ -158,6 +178,10 @@ static void update_reference(CharacterModule *c, uint32_t now_ms,
     /* Process before rearming, so an edge captured while disarmed is ignored. */
     if (pending && c->reference_armed && reference_ok
         && (c->calibration == CHARACTER_HOMING || c->calibration == CHARACTER_READY)) {
+        /* The callback must provide the encoder position AT/NEAR the crossing.
+         * A late current reading would shift zero by motion since the crossing.
+         * Reject stale events, unavailable samples and samples too far in time;
+         * keep the old offset until a later acceptable reference event. */
         if (now_ms - crossing_ms <= c->config.max_reference_event_age_ms
             && hw->read_reference_sample(hw->context, c->config.encoder_channel,
                                          crossing_ms, &sample)
@@ -168,8 +192,12 @@ static void update_reference(CharacterModule *c, uint32_t now_ms,
             bool homing = c->calibration == CHARACTER_HOMING;
             c->reference_offset_x10 = sample.angle_x10;
             c->calibration = CHARACTER_READY;
+            /* Controller uses this revision to distinguish an offset jump
+             * from players physically approaching each other. */
             ++c->calibration_revision;
             c->reference_armed = false;
+            /* Initial homing stops here; normal in-game recalibration should
+             * refresh zero without stopping ordinary player movement. */
             if (homing) hw->stop_homing(hw->context, c->config.player_id);
             return;
         }
@@ -181,6 +209,9 @@ static void update_reference(CharacterModule *c, uint32_t now_ms,
 
 static int identify_pillar(CharacterModule *c)
 {
+    /* Attribute an already detected contact; never decide whether it happened.
+     * Prefer wiring identity, otherwise require one unique angular match.
+     * Returning -1 keeps the contact real even when its pillar is unknown. */
     CharacterConfig *config = &c->config;
     int match = CHARACTER_UNKNOWN_PILLAR;
     uint8_t i;
@@ -202,6 +233,9 @@ static int identify_pillar(CharacterModule *c)
 
 static void record_pillar(CharacterModule *c, uint32_t now_ms)
 {
+    /* Fixed-size FIFO: head is the oldest event, count is the number pending.
+     * GL drains this every loop. First-observation timestamps survive delays
+     * between detection and consumption, including simultaneous player hits. */
     uint8_t index;
     if (c->pillar_count == CHARACTER_EVENT_CAPACITY) {
         ++c->dropped_pillar_events;
@@ -216,6 +250,10 @@ static void record_pillar(CharacterModule *c, uint32_t now_ms)
 
 static void update_switch(CharacterModule *c, uint32_t now_ms)
 {
+    /* Accept the first armed press immediately. Suppress held/bouncing presses
+     * until release stays stable for release_debounce_ms. This is contact
+     * debounce, not a gameplay lockout, and does not filter isolated noise.
+     * Polling cannot detect a press that starts AND ends between updates. */
     bool pressed;
     CharacterHardware *hw = &c->config.hardware;
     c->pillar_input_error = !hw->read_pillar_pressed(hw->context,
@@ -254,16 +292,22 @@ void character_update(CharacterModule *c, uint32_t now_ms)
     hw = &c->config.hardware;
     reference_ok = hw->read_reference_active(hw->context, c->config.player_id, &active);
     c->reference_input_error = !reference_ok;
+    /* Apply any accepted offset before calculating this pass's current angle. */
     update_reference(c, now_ms, reference_ok, active);
     c->encoder_error = !hw->read_encoder(hw->context, c->config.encoder_channel, &sample);
     if (!c->encoder_error) {
         c->encoder_error = sample.angle_x10 >= CHARACTER_TURN_X10
             || now_ms - sample.sampled_ms > c->config.max_sample_age_ms;
     }
+    /* Failure invalidates the current position but preserves the last cache
+     * and established offset. GL must check validity before publishing/using
+     * that cache; it must not substitute zero for a failed encoder read. */
     c->angle_valid = !c->encoder_error && c->calibration == CHARACTER_READY;
     if (c->angle_valid) {
         c->angle_x10 = relative_angle(c, sample.angle_x10);
         c->sampled_ms = sample.sampled_ms;
+        /* Rearm only outside the buffer AND with the sensor clear. Circular
+         * distance makes 359 degrees close to zero, not safely outside it. */
         if (!c->reference_armed && reference_ok && !active
             && character_angular_distance(c->angle_x10, 0U) > c->config.reference_rearm_x10)
             c->reference_armed = true;
@@ -288,6 +332,8 @@ bool character_angle_is_valid(const CharacterModule *c)
 
 PillarCollisionStatus character_read_pillar_collision(CharacterModule *c)
 {
+    /* Consumption advances the FIFO; an event cannot be counted twice by
+     * repeated reads. Always test is_hit before inspecting id or hit_ms. */
     PillarCollisionStatus event = {CHARACTER_UNKNOWN_PILLAR, false, 0U};
     if (c != NULL && c->initialized && c->pillar_count > 0U) {
         event = c->pillar_events[c->pillar_head];
@@ -299,6 +345,8 @@ PillarCollisionStatus character_read_pillar_collision(CharacterModule *c)
 
 CharacterCollisionStatus character_read_character_collision(CharacterModule *c)
 {
+    /* Clear only the pending flag. The timestamp is meaningful only when
+     * is_hit is true; a subsequent empty read may still contain the old time. */
     CharacterCollisionStatus event = {false, 0U};
     if (c != NULL && c->initialized) {
         event = c->character_event;
@@ -309,6 +357,8 @@ CharacterCollisionStatus character_read_character_collision(CharacterModule *c)
 
 void character_record_character_collision(CharacterModule *c, uint32_t now_ms)
 {
+    /* Per-player copy for consumers that need a simple notification. The
+     * controller retains the full pair snapshot for direction decisions. */
     if (c == NULL || !c->initialized) return;
     if (c->character_event.is_hit) {
         ++c->dropped_character_events;
