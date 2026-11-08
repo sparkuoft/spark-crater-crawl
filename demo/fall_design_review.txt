@@ -1,0 +1,23 @@
+# Crater Crawl: game logic demo for the fall design review
+# 2 players, 6 pillars. Each pillar warns (LEDs), rises, holds at the top, then lowers.
+# A pillar can only hit a player while it's fully up (#).
+?
+s
++3000
+# The round starts at EASY: long warnings, a new pillar about every 3.5 s.
+# PILLAR CMD lines are the commands the game sends to the Pillars subteam.
++7500
+# P0 reports a hit, but no pillar is fully up right now, so it's ignored.
+h0
++22500
+# 30 s in: difficulty steps up to NORMAL. Shorter warnings, pillars come faster.
++30000
+# 60 s in: HARD. At most 3 pillars are ever active, so the 3-motor power cap is never exceeded.
++4000
+# Pillar 5 is up and P1 is in its spot. One hit is fatal for now.
+h1
+# The game sends Wheels its trigger, and the round ends once every pillar is back down.
++4000
+# Reset, ready for the next round.
+r
+q
