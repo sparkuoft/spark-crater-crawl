@@ -2,40 +2,6 @@
 #include <stdio.h>
 #include "debug_log.h"
 
-#ifdef ARDUINO
-#include <Arduino.h>
-
-// Longest single log line. Anything longer is cut off, so keep each log_text
-// call to one line of output (print_help in console.cpp does this).
-#define LOG_BUF_SIZE 160
-
-void log_line(uint32_t now_ms, const char *fmt, ...)
-{
-    char buf[LOG_BUF_SIZE];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-
-    Serial.print('[');
-    Serial.print((unsigned long)now_ms);
-    Serial.print("] ");
-    Serial.println(buf);
-}
-
-void log_text(const char *fmt, ...)
-{
-    char buf[LOG_BUF_SIZE];
-    va_list args;
-    va_start(args, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-
-    Serial.print(buf);
-}
-
-#else
-
 void log_line(uint32_t now_ms, const char *fmt, ...)
 {
     printf("[%lu] ", (unsigned long)now_ms);
@@ -55,8 +21,6 @@ void log_text(const char *fmt, ...)
     vprintf(fmt, args);
     va_end(args);
 }
-
-#endif
 
 const char *game_phase_name(GamePhase p)
 {

@@ -157,6 +157,7 @@ void game_start(uint32_t now_ms)
     }
 
     reset_players();
+    s_difficulty = WARN_EASY; // so the countdown doesn't show last round's difficulty
     enter_phase(PHASE_COUNTDOWN, now_ms);
 }
 

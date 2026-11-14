@@ -70,10 +70,13 @@ static uint8_t pickPillar()
     return (uint8_t)candidates[rand() % n];
 }
 
+// Fake warnings stay off until the team decides on them.
+#define FAKE_WARNINGS_ENABLED 0
+
 // random placeholder logic up for "ankle-breakers" based on SHARED_STATE_H
 static bool shouldSpawnFake(WarningMode mode)
 {
-    if (mode != WARN_HARD)
+    if (!FAKE_WARNINGS_ENABLED || mode != WARN_HARD)
     {
         return false;
     }
