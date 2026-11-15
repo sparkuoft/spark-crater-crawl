@@ -42,8 +42,6 @@
 
 #define MAX_ADVANCE_MS 600000UL /* cap one +<ms> step at 10 min of simulated time */
 
-SharedState g_state;
-
 static uint32_t s_now_ms = 0;
 static uint32_t s_resume_ms = 0; // after +<ms>, the next command waits until this time
 

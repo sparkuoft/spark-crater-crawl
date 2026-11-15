@@ -21,18 +21,23 @@ static unsigned s_pillars_raised = 0;
 
 static void print_help()
 {
-    log_text("commands:\n"
-             "  s         start game\n"
-             "  r         reset to IDLE\n"
-             "  h<p> [n]  fake a Tracking hit on player p by pillar n, e.g. h1 3\n"
-             "            (no n: uses a pillar that's up. Only EXTENDED pillars count)\n"
-             "  w<n>      warn + raise pillar n now (RUNNING only, at most %d active pillars,\n"
-             "            same limit as the sequencer)\n"
-             "  ?         print state\n"
-             "  +<ms>     advance simulated time, e.g. +3000 (live mode: wait that long)\n"
-             "  # text    comment, printed as-is (for demo scripts)\n"
-             "  q         quit\n",
+    // One call per line: on the Mega each log call is cut off at one buffer
+    // (LOG_BUF_SIZE in debug_log.cpp).
+    log_text("commands:\n");
+    log_text("  s         start game\n");
+    log_text("  r         reset to IDLE\n");
+    log_text("  h<p> [n]  fake a Tracking hit on player p by pillar n, e.g. h1 3\n");
+    log_text("            (no n: uses a pillar that's up. Only EXTENDED pillars count)\n");
+    log_text("  w<n>      warn + raise pillar n now (RUNNING only, at most %d active pillars,\n",
              MAX_SIMULTANEOUS_PILLAR_MOVES);
+    log_text("            same limit as the sequencer)\n");
+    log_text("  ?         print state\n");
+#ifndef ARDUINO
+    // Handled by the laptop driver (laptop/main.cpp), not the Mega sketch.
+    log_text("  +<ms>     advance simulated time, e.g. +3000 (live mode: wait that long)\n");
+    log_text("  # text    comment, printed as-is (for demo scripts)\n");
+    log_text("  q         quit\n");
+#endif
 }
 
 // First EXTENDED pillar, or 0 if none is up (the hit is then ignored).
