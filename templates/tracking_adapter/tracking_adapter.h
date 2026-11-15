@@ -32,8 +32,8 @@ void tracking_update(uint32_t now_ms);
  * as the start check before game_start(). */
 bool tracking_ready();
 
-/* Called from the photo-interrupter interrupt for that player (see
- * tracking_hal.cpp). Not for normal code. */
+/* Called from Tracking's photo-interrupter interrupt handler for that
+ * player. Not for normal code. */
 void tracking_reference_edge(uint8_t player_id, uint32_t crossing_ms);
 
 #endif

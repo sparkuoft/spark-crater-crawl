@@ -1,5 +1,4 @@
 #include "tracking_adapter.h"
-#include "tracking_hal.h"
 #include "tracking/CharacterModule.h"
 #include "game_fsm.h"
 #include "debug_log.h"
@@ -16,6 +15,9 @@
  *    updated directly.
  *  - GL picks CollisionEvent.pillar_id (TODO 4 in tracking_update).
  *  - g_state.players[i].angle_x10 is written here and nowhere else.
+ *  - The hardware side (encoder reads, photo-interrupters, limit switches,
+ *    pins and interrupts) is Tracking's own code. The TODOs below say what
+ *    the adapter needs from it; get the exact function names from them.
  */
 
 static_assert(ANGLE_MAX_X10 == CHARACTER_TURN_X10,
@@ -30,17 +32,18 @@ bool tracking_init()
     // TODO 1: Set up each player's module. For each player i (0 and 1):
     //     CharacterConfig cfg = character_default_config();
     //     cfg.player_id = i;
-    //     cfg.encoder_channel = tracking_hal_encoder_channel(i);
-    //     cfg.encoder_sign = tracking_hal_encoder_sign(i);
-    //     cfg.hardware = tracking_hal_callbacks();
+    //     cfg.encoder_channel = <player i's mux channel, from Tracking>;
+    //     cfg.encoder_sign = <+1 or -1, from Tracking>;
+    //     cfg.hardware = <Tracking's hardware callbacks (a CharacterHardware)>;
     //     if (!character_init(&s_players[i], &cfg)) -> log_line(...) and return false
     //   For first tests, cfg.homing_timeout_ms = 60000 gives a minute to push
     //   the figure past the photo-interrupter by hand (default is 10 s).
     //
     // TODO 2: Only after BOTH inits succeed:
     //     s_initialized = true;
-    //     tracking_hal_begin();   // pin modes and interrupts
+    //     <Tracking's pin and interrupt setup>
     //   The interrupts must not be attached before the modules are set up.
+    //   Their interrupt handlers call tracking_reference_edge() below.
     //
     // TODO 3: log_line(..., "tracking ready") and return true.
     return false;
@@ -63,8 +66,8 @@ void tracking_update(uint32_t now_ms)
     if (!s_initialized)
         return;
 
-    // TODO 1: tracking_hal_service();
-    //   Reads both encoders and keeps a short history (Tracking writes it).
+    // TODO 1: <Tracking's per-loop encoder sampling, if they have one>
+    //   Reads both encoders and keeps a short history with timestamps.
 
     for (uint8_t i = 0; i < NUM_PLAYERS; i++)
     {
@@ -121,7 +124,7 @@ bool tracking_ready()
     return false;
 }
 
-// Runs inside the photo-interrupter interrupt (tracking_hal.cpp). Keep it
+// Runs inside the photo-interrupter interrupt (Tracking's handler calls it). Keep it
 // exactly this short: no Serial, no I2C, no game calls inside an interrupt.
 void tracking_reference_edge(uint8_t player_id, uint32_t crossing_ms)
 {
