@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include "shared_state.h"
 
-/* Debug output shared by the game FSM and the test console.
- * Plain stdio for now while we test on a laptop. When moving to the Mega,
- * debug_log.cpp is the only output code that needs to change. */
+/* Debug output shared by the game FSM and the test console. Goes to Serial
+ * on the Mega and to stdout in the laptop build. Every print in the game
+ * goes through here, so this is the one place to quiet them for timing. */
 
 #if defined(__GNUC__)
 #define LOG_PRINTF_FMT(fmt_idx, args_idx) __attribute__((format(printf, fmt_idx, args_idx)))
