@@ -13,14 +13,19 @@ def main():
     args = parser.parse_args()
     tests = Path(__file__).resolve().parent
     sensor = tests.parent
+    # CharacterModule is built into the Wheels Mega firmware, so it lives in
+    # that sketch; CharacterController stays here.
+    module = sensor.parent / 'crater_crawl_wheels' / 'src' / 'tracking'
+    source_dirs = {'CharacterModule': module, 'CharacterController': sensor}
+    includes = ['-I', str(sensor), '-I', str(module)]
     output = sensor.parent / 'build' / 'tracking-tests'
     output.mkdir(parents=True, exist_ok=True)
     warnings = ['-Wall', '-Wextra', '-Wpedantic', '-Wconversion', '-Wshadow', '-Werror']
     objects = []
     for name in ('CharacterModule', 'CharacterController'):
         obj = output / (name + '.o')
-        subprocess.run([args.cc, '-std=c11', *warnings, '-I', str(sensor),
-                        '-c', str(sensor / (name + '.c')), '-o', str(obj)], check=True)
+        subprocess.run([args.cc, '-std=c11', *warnings, *includes,
+                        '-c', str(source_dirs[name] / (name + '.c')), '-o', str(obj)], check=True)
         objects.append(str(obj))
     suffix = '.exe' if os.name == 'nt' else ''
     for source, compiler, standard in (
@@ -28,7 +33,7 @@ def main():
         ('cpp_link_smoke.cpp', args.cxx, '-std=c++11'),
     ):
         executable = output / (Path(source).stem + suffix)
-        subprocess.run([compiler, standard, *warnings, '-I', str(sensor),
+        subprocess.run([compiler, standard, *warnings, *includes,
                         str(tests / source), *objects, '-o', str(executable)], check=True)
         subprocess.run([str(executable)], check=True)
     print('PASS C++ headers and linkage against separately compiled C objects')

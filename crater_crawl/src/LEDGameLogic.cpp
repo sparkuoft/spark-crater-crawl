@@ -1,3 +1,6 @@
+// Mega only: FastLED doesn't exist in the laptop build (see pillar_led_laptop.cpp).
+#ifdef ARDUINO
+
 #include <FastLED.h>
 #include "pillar_led.h"
 
@@ -199,3 +202,5 @@ void pillarLedsInit() {
     FastLED.clear();
     FastLED.show();
 }
+
+#endif // ARDUINO

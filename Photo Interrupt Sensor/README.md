@@ -1,5 +1,11 @@
 # Character tracking (C)
 
+> **Where the files are (2026-11-22):** `CharacterModule.h/.c` now live in
+> `crater_crawl_wheels/src/tracking/`, because they're built into the Wheels Mega
+> firmware. `CharacterController.*`, the tests and the PCB stay in this folder, and
+> `tests/run_tests.py` finds the module in its new place. The hardware callbacks
+> are in `crater_crawl_wheels/tracking_hal.cpp`. See `docs/INTEGRATION.md`.
+
 `CharacterModule.c` and `CharacterController.c` implement the tracking logic in
 C11 with fixed storage and no dynamic allocation. They do not include Arduino
 or `shared_state.h`. C++ callers can include the headers directly because the

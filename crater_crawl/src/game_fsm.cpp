@@ -1,6 +1,7 @@
 #include "game_fsm.h"
 #include "pillar_fsm.h"
 #include "pillar_seq.h"
+#include "wheels_link.h"
 #include "debug_log.h"
 
 static_assert(DIFFICULTY_NORMAL_AT_MS < DIFFICULTY_HARD_AT_MS, "difficulty thresholds out of order");
@@ -123,12 +124,15 @@ static void lower_all_pillars(uint32_t now_ms)
     }
 }
 
-// Outbound to Wheels (W|E). No transport agreed with Alice yet, so for now
-// this only logs the payload.
+// Outbound to Wheels (W|E): logged here, then sent to the Wheels Mega over
+// the serial link (wheels_link.cpp).
 static void send_wheels_trigger(const WheelsTrigger &t, uint32_t now_ms)
 {
     log_line(now_ms, "WHEELS player=%u fatal=%s ts=%lu",
              (unsigned)t.player_id, t.fatal ? "yes" : "no", (unsigned long)t.timestamp_ms);
+
+    // A plain hit freezes the player for the lockout; a fatal one holds until reset.
+    wheels_link_send_trigger(t, t.fatal ? 0 : POST_HIT_LOCKOUT_MS);
 }
 
 void game_fsm_init(uint32_t now_ms)
@@ -164,6 +168,7 @@ void game_start(uint32_t now_ms)
 void game_reset(uint32_t now_ms)
 {
     lower_all_pillars(now_ms);
+    wheels_link_release_all(); // ends any hit freeze or death hold on the Wheels Mega
     reset_players();
     s_difficulty = WARN_EASY;
 

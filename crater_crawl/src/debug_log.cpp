@@ -2,6 +2,18 @@
 #include <stdio.h>
 #include "debug_log.h"
 
+static bool s_log_enabled = true;
+
+void log_set_enabled(bool enabled)
+{
+    s_log_enabled = enabled;
+}
+
+bool log_is_enabled()
+{
+    return s_log_enabled;
+}
+
 #ifdef ARDUINO
 #include <Arduino.h>
 
@@ -11,6 +23,8 @@
 
 void log_line(uint32_t now_ms, const char *fmt, ...)
 {
+    if (!s_log_enabled)
+        return;
     char buf[LOG_BUF_SIZE];
     va_list args;
     va_start(args, fmt);
@@ -25,6 +39,8 @@ void log_line(uint32_t now_ms, const char *fmt, ...)
 
 void log_text(const char *fmt, ...)
 {
+    if (!s_log_enabled)
+        return;
     char buf[LOG_BUF_SIZE];
     va_list args;
     va_start(args, fmt);
@@ -38,6 +54,8 @@ void log_text(const char *fmt, ...)
 
 void log_line(uint32_t now_ms, const char *fmt, ...)
 {
+    if (!s_log_enabled)
+        return;
     printf("[%lu] ", (unsigned long)now_ms);
 
     va_list args;
@@ -50,6 +68,8 @@ void log_line(uint32_t now_ms, const char *fmt, ...)
 
 void log_text(const char *fmt, ...)
 {
+    if (!s_log_enabled)
+        return;
     va_list args;
     va_start(args, fmt);
     vprintf(fmt, args);

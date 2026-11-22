@@ -9,6 +9,7 @@
  *   ./crater_crawl          script mode: time only moves on +<ms>, so a round
  *                           runs instantly and the same input always gives
  *                           the same output
+ *   ./crater_crawl --test   run the unit tests (same as t on the Mega)
  *   ./crater_crawl --live   live mode: time runs in real time and commands
  *                           apply as you type them; +<ms> waits that long
  *                           before the next command
@@ -38,6 +39,8 @@
 #include "shared_state.h"
 #include "game_fsm.h"
 #include "console.h"
+#include "wheels_link.h"
+#include "unit_tests.h"
 #include "debug_log.h"
 
 #define MAX_ADVANCE_MS 600000UL /* cap one +<ms> step at 10 min of simulated time */
@@ -55,6 +58,7 @@ static std::atomic<bool> s_input_done(false);
 // made by this update are reported at the same millisecond.
 static void run_loop_once()
 {
+    wheels_link_update(s_now_ms); // nothing arrives on the laptop; kept so the loop matches the Mega's
     game_fsm_update(s_now_ms);
     console_tick(s_now_ms);
 }
@@ -212,9 +216,15 @@ int main(int argc, char **argv)
         {
             live = true;
         }
+        else if (strcmp(argv[i], "--test") == 0)
+        {
+            // Same unit tests as typing t on the Mega. Exit code 0 = all passed.
+            game_fsm_init(0);
+            return run_unit_tests(0) ? 0 : 1;
+        }
         else
         {
-            fprintf(stderr, "usage: %s [--live]\n", argv[0]);
+            fprintf(stderr, "usage: %s [--live | --test]\n", argv[0]);
             return 1;
         }
     }
