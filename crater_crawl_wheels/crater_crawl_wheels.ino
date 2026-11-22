@@ -3,6 +3,8 @@
 #include "WheelResistance.h"
 #include "WheelsPin.h"
 #include "AS5600.h"
+#include "tracking_hal.h"
+#include "game_link.h"
 
 #include <TCA9548A.h>
 #include <TimerOne.h> // might need to change
@@ -62,7 +64,10 @@ unsigned long lastSpeedUpdatedMicros = 0; // Time when speed was last updated
 
 // set this from game logic
 // true = DC resistance with stepper paused; false = release DC and follow input
+// Set every loop: on while the Game Mega has this player frozen (hit) or held
+// (fatal hit), or while manualResist is on.
 bool resistEnabled = false;
+bool manualResist = false; // '1' / '0' in the Serial Monitor, for testing
 
 //---------------- Encoder ISRs ----------------
 
@@ -201,6 +206,16 @@ float readStepperAngle()
         mux.closeChannel(STEPPER_MUX_CHANNEL);
     }
     return degrees;
+}
+
+// Tracking asks for a fresh angle right after a photo-interrupter fires.
+// Only player 0's AS5600 is wired so far.
+bool readCharacterAngle(uint8_t player, float *degrees)
+{
+    if (player != 0)
+        return false;
+    *degrees = readStepperAngle();
+    return true;
 }
 
 void updateStepperTarget()
@@ -424,6 +439,13 @@ void setup()
 
     animate_servo.attach(9); // motor pin 
     animate_servo.write(180);
+
+    // Tracking (photo-interrupters, hit switches) and the link to the Game Mega.
+    if (!tracking_begin(readCharacterAngle, millis()))
+    {
+        Serial.println(F("Tracking setup failed: check tracking_hal.cpp settings."));
+    }
+    game_link_begin();
 }
 
 //---------------- Loop ----------------
@@ -436,14 +458,18 @@ void loop()
         char command = Serial.read();
         if (command == '1')
         {
-            resistEnabled = true;
+            manualResist = true;
         }
         else if (command == '0')
         {
-            resistEnabled = false;
+            manualResist = false;
             dead = false;
         }
     }
+
+    resistEnabled = manualResist || game_link_player_frozen(0, millis());
+    if (!resistEnabled)
+        dead = false; // released: the next hit plays the servo animation again
 
     servo_animate_update();
 
@@ -459,9 +485,17 @@ void loop()
     {
         character_stepperDeg = readStepperAngle();
         lastAS5600ReadMs = millis();
+        tracking_note_angle(0, character_stepperDeg, lastAS5600ReadMs);
     }
     serviceStepper();
     if (stepPulseHigh) return;
+
+    // Tracking and the Game Mega link: neither waits on anything.
+    tracking_update(millis());
+    game_link_update(millis());
+    serviceStepper();
+    if (stepPulseHigh) return;
+
     reportTelemetry();
     serviceStepper();
 }
