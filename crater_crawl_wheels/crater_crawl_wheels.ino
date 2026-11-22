@@ -12,6 +12,7 @@
 #include <math.h> // lroundf() rounds target positions to whole steps
 #include <stdio.h>
 #include <stdlib.h>
+#include <Servo.h>
 
 // MotorA:: contains pin settings; motorA is the actual motor object.
 DCMotor motorA;
@@ -83,6 +84,63 @@ void encoderB_ISR()
 void timerISR()
 {
     resistance.onTimer();
+}
+
+//---------------- Hit servo ----------------
+
+const uint8_t HIT_SERVO_PIN = 9;
+Servo hitServo;
+
+enum class HitServoState { Rest, React, Animate, Return };
+
+void updateHitServo(bool hit, unsigned long now)
+{
+    static HitServoState state = HitServoState::Rest;
+    static bool hitPlayed = false;
+    static unsigned long stateStarted = 0;
+
+    if (!hit)
+        hitPlayed = false;
+
+    const unsigned long elapsed = now - stateStarted;
+    switch (state)
+    {
+    case HitServoState::Rest:
+        if (hit && !hitPlayed)
+        {
+            hitPlayed = true;
+            stateStarted = now;
+            state = HitServoState::React;
+            hitServo.write(90);
+        }
+        break;
+
+    case HitServoState::React:
+        if (elapsed >= 200)
+        {
+            stateStarted = now;
+            state = HitServoState::Animate;
+        }
+        break;
+
+    case HitServoState::Animate:
+        if (elapsed < 600)
+        {
+            hitServo.write(elapsed >= 300 && elapsed < 400 ? 90 : 100);
+        }
+        else
+        {
+            stateStarted = now;
+            state = HitServoState::Return;
+            hitServo.write(180);
+        }
+        break;
+
+    case HitServoState::Return:
+        if (elapsed >= 1000)
+            state = HitServoState::Rest;
+        break;
+    }
 }
 
 
@@ -333,6 +391,9 @@ void setup()
     Timer1.initialize(WheelsConfig::PERIOD_MS * 1000UL);
     Timer1.attachInterrupt(timerISR);
 
+    hitServo.attach(HIT_SERVO_PIN);
+    hitServo.write(180);
+
     // Tracking (photo-interrupters, hit switches) and the link to the Game Mega.
     if (!tracking_begin(readCharacterAngle, millis()))
     {
@@ -367,8 +428,10 @@ void loop()
     // Finish any already-started pulse even when switching into resistance mode.
     if (stepPulseHigh) return;
 
-    // Read the library's absolute angle periodically; it never changes the target.
     unsigned long now = millis();
+    updateHitServo(resistEnabled, now);
+
+    // Read the library's absolute angle periodically; it never changes the target.
     if (now - lastAS5600ReadMs >= AS5600_READ_INTERVAL_MS)
     {
         character_stepperDeg = readStepperAngle();
