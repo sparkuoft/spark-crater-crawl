@@ -1,4 +1,5 @@
 #include "pillar_fsm.h"
+#include "pillar_led.h"
 #include "debug_log.h"
 
 // Per-pillar flag: true if the current warning is an ankle-breaker (no rise).
@@ -51,13 +52,14 @@ static const char *actionName(PillarAction a)
     return "?";
 }
 
-// Outbound to Pillars (P|E). No transport agreed yet, so for now this only
-// logs the payload (same approach as send_wheels_trigger in game_fsm.cpp).
+// Outbound to Pillars (P|E). The LED strip gets every command; the pillar
+// motors have no driver code yet, so for them it's only logged.
 static void sendPillarCommand(const PillarCommand &cmd, uint32_t now_ms)
 {
     log_line(now_ms, "PILLAR CMD pillar=%u action=%s mode=%s fake=%s",
              (unsigned)cmd.pillar_id, actionName(cmd.action),
              warning_mode_name(cmd.warn_mode), cmd.is_fake ? "yes" : "no");
+    pillarLedsHandleCommand(cmd, now_ms);
 }
 
 static void sendPillarCommand(uint8_t id, PillarAction action, WarningMode mode, bool isFake, uint32_t now_ms)
