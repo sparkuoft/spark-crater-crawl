@@ -6,13 +6,18 @@
  * Spark Design Club, 2026-2027
  *
  * Owner: Antoine Tabet (Game Logic / GL|E)
- * Last updated: 2026-10-13
+ * Last updated: 2026-11-22
  *
  * ONE WRITER PER FIELD. Every field below is tagged with the subteam that
  * writes it; everyone else reads only. If you need to write a field you don't
  * own, that's an interface change -- talk to GL first, don't just write it.
  *
- * Target: single Arduino Mega 2560 (decision provisional pending P|E pin count).
+ * Target: two Arduino Mega 2560s (decided 2026-11-22).
+ *   Game Mega   (crater_crawl/)        game FSM, pillars, LED strip, console
+ *   Wheels Mega (crater_crawl_wheels/) Wheels' motors and Tracking's sensors
+ * They talk over Serial2; the messages are in board_link_protocol.h. One board
+ * couldn't do both: Wheels needs every interrupt pin, a very fast loop for
+ * the steppers, and pin 6, which the LED strip also uses.
  */
 
 #include <stdint.h>
@@ -121,10 +126,10 @@ enum WarningMode : uint8_t
  * angle_x10  -- written by TRACKING (T|E)
  * everything else -- written by GL
  *
- * OPEN: Alice (W|E) lists 2x AS5600 on the character ring, and Anthony's
- * tracking doc also lists magnetic encoders for character position. These may
- * be the same two sensors. Owner of the read path is unresolved as of
- * 2026-08-11 -- GL must receive the angle from exactly one source. */
+ * Read path (settled 2026-11-22): Wheels' code reads the AS5600 on each
+ * character on the Wheels Mega, Tracking turns it into angle_x10 there, and
+ * the Game Mega receives it in A messages (wheels_link.cpp). That is the one
+ * source; nothing else writes angle_x10. */
 struct PlayerState
 {
     uint16_t angle_x10;          /* T|E. Absolute, shared reference, 0..3599 */
@@ -165,7 +170,10 @@ struct PillarCommand
 };
 
 /* Collision report from Tracking to GL. LOCKED with Anthony (T|E).
- * Written by T|E, read by GL. */
+ * Written by T|E, read by GL.
+ * Two-board setup: Tracking reports the switch press in an H message, and
+ * wheels_link.cpp fills this in on the Game Mega (picking the raised pillar if
+ * Tracking doesn't know which one it was). */
 struct CollisionEvent
 {
     uint8_t player_id; /* 0..NUM_PLAYERS-1 */
@@ -178,7 +186,7 @@ struct CollisionEvent
  * Deliberately carries player_id ONLY -- Wheels does not need to know which
  * pillar was involved, and the payload is identical whether the animation ends
  * up being servo or the LED fallback.
- * Written by GL, read by W|E. */
+ * Written by GL, read by W|E. Sent to the Wheels Mega as a T message. */
 struct WheelsTrigger
 {
     uint8_t player_id;
