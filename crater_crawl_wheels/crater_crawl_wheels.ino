@@ -3,8 +3,6 @@
 #include "WheelResistance.h"
 #include "WheelsPin.h"
 #include "AS5600.h"
-#include "tracking_hal.h"
-#include "game_link.h"
 
 #include <TCA9548A.h>
 #include <TimerOne.h> // might need to change
@@ -12,6 +10,7 @@
 #include <math.h> // lroundf() rounds target positions to whole steps
 #include <stdio.h>
 #include <stdlib.h>
+#include <Arduino.h>
 #include <Servo.h>
 
 // MotorA:: contains pin settings; motorA is the actual motor object.
@@ -61,11 +60,9 @@ bool stepPulseHigh = false; // whether STEP is currently HIGH
 float currentSpeed = 0.0f; // Current speed in degrees per second
 unsigned long lastSpeedUpdatedMicros = 0; // Time when speed was last updated
 
-// true = DC resistance with stepper paused; false = release DC and follow input.
-// Set every loop: on while the Game Mega has this player frozen (hit) or held
-// (fatal hit), or while manualResist is on.
+// set this from game logic
+// true = DC resistance with stepper paused; false = release DC and follow input
 bool resistEnabled = false;
-bool manualResist = false; // '1' / '0' in the Serial Monitor, for testing
 
 //---------------- Encoder ISRs ----------------
 
@@ -86,62 +83,106 @@ void timerISR()
     resistance.onTimer();
 }
 
-//---------------- Hit servo ----------------
+//---------------- Servo 9g ----------------
 
-const uint8_t HIT_SERVO_PIN = 9;
-Servo hitServo;
+bool hit_status = resistEnabled;
+bool dead = false;
+// bool previous_hit_status = false;
 
-enum class HitServoState { Rest, React, Animate, Return };
+Servo animate_servo;
 
-void updateHitServo(bool hit, unsigned long now)
-{
-    static HitServoState state = HitServoState::Rest;
-    static bool hitPlayed = false;
-    static unsigned long stateStarted = 0;
+int pos = 180;
 
-    if (!hit)
-        hitPlayed = false;
+unsigned long start_time = 0;
+unsigned long current_time_stamp = 0;
 
-    const unsigned long elapsed = now - stateStarted;
-    switch (state)
-    {
-    case HitServoState::Rest:
-        if (hit && !hitPlayed)
-        {
-            hitPlayed = true;
-            stateStarted = now;
-            state = HitServoState::React;
-            hitServo.write(90);
-        }
-        break;
+// State machine
+enum ServoState {
+    REST,
+    REACT,
+    ANIMATE,
+    RETURN
+};
 
-    case HitServoState::React:
-        if (elapsed >= 200)
-        {
-            stateStarted = now;
-            state = HitServoState::Animate;
-        }
-        break;
+ServoState servo_state = REST;
 
-    case HitServoState::Animate:
-        if (elapsed < 600)
-        {
-            hitServo.write(elapsed >= 300 && elapsed < 400 ? 90 : 100);
-        }
-        else
-        {
-            stateStarted = now;
-            state = HitServoState::Return;
-            hitServo.write(180);
-        }
-        break;
+void servo_animate_update() {
 
-    case HitServoState::Return:
-        if (elapsed >= 1000)
-            state = HitServoState::Rest;
-        break;
+    hit_status = resistEnabled;  // Refresh the hit status each call
+    current_time_stamp = millis();
+
+    switch (servo_state) {
+
+        case REST:
+
+            animate_servo.write(180);
+
+            // only go into first state of FSM if hit = true and its not already dead
+            if (hit_status && !dead) {
+                dead = true;
+                start_time = current_time_stamp;
+                servo_state = REACT;
+                Serial.println("Starting");
+            }
+
+            break;
+
+
+        case REACT:
+
+            // Move to reaction position
+            animate_servo.write(90);
+
+            if (current_time_stamp - start_time >= 200) {
+                start_time = current_time_stamp;
+                servo_state = ANIMATE;
+                //Serial.println("react");
+            }
+
+            break;
+
+
+        case ANIMATE:
+
+            // Small animation around 90 degrees
+            if (current_time_stamp - start_time < 300) {
+                animate_servo.write(100);
+                // Serial.println("animate");
+            }
+            else if (current_time_stamp - start_time < 400) {
+                animate_servo.write(90);
+            }
+            else if (current_time_stamp - start_time < 600) {
+                animate_servo.write(100);
+            }
+            else {
+                start_time = current_time_stamp;
+                servo_state = RETURN;
+            }
+
+            break;
+
+
+        case RETURN:
+
+            // Return to resting position
+            animate_servo.write(180);
+            // Serial.println("return");
+
+            // after one second, go back to rest state
+            // within the 1.2 second limit
+            if (current_time_stamp - start_time >= 1000) {
+                servo_state = REST;
+            }
+
+            break;
     }
+
+    // Update previous hit status every loop
+    // previous_hit_status = hit_status;
 }
+
+//motor code
 
 
 float readStepperAngle()
@@ -160,16 +201,6 @@ float readStepperAngle()
         mux.closeChannel(STEPPER_MUX_CHANNEL);
     }
     return degrees;
-}
-
-// Tracking asks for a fresh angle right after a photo-interrupter fires.
-// Only player 0's AS5600 is wired so far.
-bool readCharacterAngle(uint8_t player, float *degrees)
-{
-    if (player != 0)
-        return false;
-    *degrees = readStepperAngle();
-    return true;
 }
 
 void updateStepperTarget()
@@ -391,15 +422,8 @@ void setup()
     Timer1.initialize(WheelsConfig::PERIOD_MS * 1000UL);
     Timer1.attachInterrupt(timerISR);
 
-    hitServo.attach(HIT_SERVO_PIN);
-    hitServo.write(180);
-
-    // Tracking (photo-interrupters, hit switches) and the link to the Game Mega.
-    if (!tracking_begin(readCharacterAngle, millis()))
-    {
-        Serial.println(F("Tracking setup failed: check tracking_hal.cpp settings."));
-    }
-    game_link_begin();
+    animate_servo.attach(9); // motor pin 
+    animate_servo.write(180);
 }
 
 //---------------- Loop ----------------
@@ -412,15 +436,16 @@ void loop()
         char command = Serial.read();
         if (command == '1')
         {
-            manualResist = true;
+            resistEnabled = true;
         }
         else if (command == '0')
         {
-            manualResist = false;
+            resistEnabled = false;
+            dead = false;
         }
     }
 
-    resistEnabled = manualResist || game_link_player_frozen(0, millis());
+    servo_animate_update();
 
     updateStepperTarget();
     resistance.update(resistEnabled);
@@ -428,25 +453,15 @@ void loop()
     // Finish any already-started pulse even when switching into resistance mode.
     if (stepPulseHigh) return;
 
-    unsigned long now = millis();
-    updateHitServo(resistEnabled, now);
-
     // Read the library's absolute angle periodically; it never changes the target.
+    unsigned long now = millis();
     if (now - lastAS5600ReadMs >= AS5600_READ_INTERVAL_MS)
     {
         character_stepperDeg = readStepperAngle();
         lastAS5600ReadMs = millis();
-        tracking_note_angle(0, character_stepperDeg, lastAS5600ReadMs);
     }
     serviceStepper();
     if (stepPulseHigh) return;
-
-    // Tracking and the Game Mega link: neither waits on anything.
-    tracking_update(millis());
-    game_link_update(millis());
-    serviceStepper();
-    if (stepPulseHigh) return;
-
     reportTelemetry();
     serviceStepper();
 }
