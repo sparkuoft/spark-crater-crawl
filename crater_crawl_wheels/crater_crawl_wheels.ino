@@ -1,5 +1,6 @@
 #include "DCMotor.h"
 #include "MotorEncoder.h"
+#include "ServoMotor.h"
 #include "WheelResistance.h"
 #include "WheelsPin.h"
 #include "AS5600.h"
@@ -13,12 +14,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Arduino.h>
-#include <Servo.h>
 
 // MotorA:: contains pin settings; motorA is the actual motor object.
 DCMotor motorA;
 MotorEncoder encoderA(MotorA::EN_A, MotorA::EN_B, WheelsConfig::ENCODER_CPR);
 WheelResistance resistance(motorA, encoderA);
+
+// ServoMotor declarations
+ServoMotor Servo_1;
+ServoMotor* const hitServos[] = {&Servo_1};
+const size_t HIT_SERVO_COUNT = sizeof(hitServos) / sizeof(hitServos[0]);
 
 // mux and encoder channel
 TCA9548A mux;
@@ -87,108 +92,6 @@ void timerISR()
 {
     resistance.onTimer();
 }
-
-//---------------- Servo 9g ----------------
-
-bool hit_status = resistEnabled;
-bool dead = false;
-// bool previous_hit_status = false;
-
-Servo animate_servo;
-
-int pos = 180;
-
-unsigned long start_time = 0;
-unsigned long current_time_stamp = 0;
-
-// State machine
-enum ServoState {
-    REST,
-    REACT,
-    ANIMATE,
-    RETURN
-};
-
-ServoState servo_state = REST;
-
-void servo_animate_update() {
-
-    hit_status = resistEnabled;  // Refresh the hit status each call
-    current_time_stamp = millis();
-
-    switch (servo_state) {
-
-        case REST:
-
-            animate_servo.write(180);
-
-            // only go into first state of FSM if hit = true and its not already dead
-            if (hit_status && !dead) {
-                dead = true;
-                start_time = current_time_stamp;
-                servo_state = REACT;
-                Serial.println("Starting");
-            }
-
-            break;
-
-
-        case REACT:
-
-            // Move to reaction position
-            animate_servo.write(90);
-
-            if (current_time_stamp - start_time >= 200) {
-                start_time = current_time_stamp;
-                servo_state = ANIMATE;
-                //Serial.println("react");
-            }
-
-            break;
-
-
-        case ANIMATE:
-
-            // Small animation around 90 degrees
-            if (current_time_stamp - start_time < 300) {
-                animate_servo.write(100);
-                // Serial.println("animate");
-            }
-            else if (current_time_stamp - start_time < 400) {
-                animate_servo.write(90);
-            }
-            else if (current_time_stamp - start_time < 600) {
-                animate_servo.write(100);
-            }
-            else {
-                start_time = current_time_stamp;
-                servo_state = RETURN;
-            }
-
-            break;
-
-
-        case RETURN:
-
-            // Return to resting position
-            animate_servo.write(180);
-            // Serial.println("return");
-
-            // after one second, go back to rest state
-            // within the 1.2 second limit
-            if (current_time_stamp - start_time >= 1000) {
-                servo_state = REST;
-            }
-
-            break;
-    }
-
-    // Update previous hit status every loop
-    // previous_hit_status = hit_status;
-}
-
-//motor code
-
 
 float readStepperAngle()
 {
@@ -437,8 +340,11 @@ void setup()
     Timer1.initialize(WheelsConfig::PERIOD_MS * 1000UL);
     Timer1.attachInterrupt(timerISR);
 
-    animate_servo.attach(9); // motor pin 
-    animate_servo.write(180);
+    // Servo Pin Setups
+    if (!Servo_1.attach(ServoPins::SERVO_1, 180))
+    {
+        Serial.println(F("Servo setup failed."));
+    }
 
     // Tracking (photo-interrupters, hit switches) and the link to the Game Mega.
     if (!tracking_begin(readCharacterAngle, millis()))
@@ -463,15 +369,10 @@ void loop()
         else if (command == '0')
         {
             manualResist = false;
-            dead = false;
         }
     }
 
     resistEnabled = manualResist || game_link_player_frozen(0, millis());
-    if (!resistEnabled)
-        dead = false; // released: the next hit plays the servo animation again
-
-    servo_animate_update();
 
     updateStepperTarget();
     resistance.update(resistEnabled);
@@ -479,8 +380,11 @@ void loop()
     // Finish any already-started pulse even when switching into resistance mode.
     if (stepPulseHigh) return;
 
-    // Read the library's absolute angle periodically; it never changes the target.
+    // updating servo
     unsigned long now = millis();
+    ServoMotor::updateAll(hitServos, HIT_SERVO_COUNT, resistEnabled, now);
+
+    // Read the library's absolute angle periodically; it never changes the target.
     if (now - lastAS5600ReadMs >= AS5600_READ_INTERVAL_MS)
     {
         character_stepperDeg = readStepperAngle();

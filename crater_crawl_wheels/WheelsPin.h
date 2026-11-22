@@ -16,6 +16,10 @@ namespace MotorA {
     const uint8_t EN_B = 3;
 }
 
+namespace ServoPins {
+    const uint8_t SERVO_1 = 9;
+}
+
 // PID settings and other constants
 namespace WheelsConfig {
     const unsigned long ENCODER_CPR = 1320; // Counts per revolution with A/B CHANGE.
