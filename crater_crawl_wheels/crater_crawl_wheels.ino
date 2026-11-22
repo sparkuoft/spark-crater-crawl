@@ -215,7 +215,7 @@ bool readCharacterAngle(uint8_t player, float *degrees)
     if (player != 0)
         return false;
     *degrees = readStepperAngle();
-    return true;
+    return isfinite(*degrees); // GL: false when the AS5600 read failed, so Tracking never homes on a made-up angle
 }
 
 void updateStepperTarget()
@@ -485,7 +485,7 @@ void loop()
     {
         character_stepperDeg = readStepperAngle();
         lastAS5600ReadMs = millis();
-        tracking_note_angle(0, character_stepperDeg, lastAS5600ReadMs);
+        tracking_note_angle(0, character_stepperDeg, lastAS5600ReadMs); // GL: a failed read (NAN) is ignored, so Tracking reports "homed, no angle"
     }
     serviceStepper();
     if (stepPulseHigh) return;

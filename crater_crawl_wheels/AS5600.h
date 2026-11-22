@@ -11,7 +11,7 @@ class AS5600 {
         // Init AS5600 I2C, and set read pointer in regfile
         void init();
 
-        // Read angle value (0-360)
+        // Read angle value (0-360), NAN if the AS5600 didn't answer (GL)
         float readAngle();
 
         // Set angle offset relative to true magnetic field (turning it to a position and call that 0 in the chip)
@@ -22,7 +22,7 @@ class AS5600 {
         int angleReg = 0x0E;
         float offset = 0.0;
 
-        // Read encoder value (0-4095)
+        // Read encoder value (0-4095), -1 if the AS5600 didn't answer (GL)
         int readEncoder();
 };
 
