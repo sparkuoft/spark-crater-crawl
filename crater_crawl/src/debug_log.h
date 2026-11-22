@@ -20,6 +20,11 @@ void log_line(uint32_t now_ms, const char *fmt, ...) LOG_PRINTF_FMT(2, 3);
 /* Raw text, no timestamp or newline added. */
 void log_text(const char *fmt, ...) LOG_PRINTF_FMT(1, 2);
 
+/* Turns every game print on or off (on by default). Off is for timing tests on
+ * the board, where Serial prints slow the loop down, and for the unit tests. */
+void log_set_enabled(bool enabled);
+bool log_is_enabled();
+
 const char *game_phase_name(GamePhase p);
 const char *pillar_phase_name(PillarPhase p);
 const char *warning_mode_name(WarningMode m);
