@@ -4,6 +4,8 @@
 #include "console.h"
 #include "game_fsm.h"
 #include "pillar_fsm.h"
+#include "wheels_link.h"
+#include "board_link_protocol.h"
 #include "debug_log.h"
 
 #define ARENA_LINE_MAX 160
@@ -31,6 +33,8 @@ static void print_help()
     log_text("  w<n>      warn + raise pillar n now (RUNNING only, at most %d active pillars,\n",
              MAX_SIMULTANEOUS_PILLAR_MOVES);
     log_text("            same limit as the sequencer)\n");
+    log_text("  m<p>      home player p: then turn that player's wheel past the photo-interrupter\n");
+    log_text("  l <msg>   act as if <msg> came from the Wheels Mega, e.g. l H 1 -1\n");
     log_text("  ?         print state\n");
 #ifndef ARDUINO
     // Handled by the laptop driver (laptop/main.cpp), not the Mega sketch.
@@ -104,6 +108,23 @@ static void print_status(uint32_t now_ms)
     for (uint8_t i = 0; i < NUM_PILLARS; i++)
         log_text(" %u:%s", (unsigned)i, pillar_phase_name(g_state.pillars[i].phase));
     log_text("\n");
+
+    const WheelsLinkStatus &link = wheels_link_status();
+    if (!link.heard)
+    {
+        log_text("  Wheels Mega: not heard from yet\n");
+        return;
+    }
+    static const char *const track_names[] = {"not homed", "homing", "ready", "homed, no angle", "homing failed"};
+    log_text("  Wheels Mega: last heard %lu ms ago, %u bad lines\n",
+             (unsigned long)(now_ms - link.last_heard_ms), (unsigned)link.bad_lines);
+    for (uint8_t i = 0; i < NUM_PLAYERS; i++)
+    {
+        uint8_t st = link.track_state[i];
+        log_text("  P%u tracking: %s, angle %u.%u deg\n", (unsigned)i,
+                 st <= LINK_TRACK_FAILED ? track_names[st] : "?",
+                 (unsigned)(g_state.players[i].angle_x10 / 10), (unsigned)(g_state.players[i].angle_x10 % 10));
+    }
 }
 
 void console_handle_line(const char *line, uint32_t now_ms)
@@ -161,6 +182,27 @@ void console_handle_line(const char *line, uint32_t now_ms)
         {
             log_line(now_ms, "warn ignored: bad pillar id or pillar not IDLE");
         }
+        break;
+
+    case 'm':
+        if (!parse_uint8(args, a) || a >= NUM_PLAYERS)
+        {
+            print_help();
+            break;
+        }
+        wheels_link_home(a);
+        log_line(now_ms, "asked the Wheels Mega to home P%u: turn that wheel until the character passes the photo-interrupter",
+                 (unsigned)a);
+        break;
+
+    case 'l':
+        // Everything after "l " is the message, e.g. "l H 1 -1".
+        if (args[0] != ' ' || args[1] == '\0')
+        {
+            print_help();
+            break;
+        }
+        wheels_link_handle_line(args + 1, now_ms);
         break;
 
     case '?':

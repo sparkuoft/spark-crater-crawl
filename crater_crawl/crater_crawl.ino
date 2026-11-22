@@ -2,6 +2,7 @@
 #include "src/game_fsm.h"
 #include "src/console.h"
 #include "src/pillar_led.h"
+#include "src/wheels_link.h"
 #include <Arduino.h>
 
 #define CMD_MAX_LEN 32
@@ -54,6 +55,7 @@ void setup()
     uint32_t now = millis();
     game_fsm_init(now);
     pillarLedsInit();
+    wheels_link_init();
     console_init(now);
 }
 
@@ -63,6 +65,10 @@ void loop()
 
     if (read_line())
         console_handle_line(s_line, now);
+
+    // Hits and angles from the Wheels Mega, before the game update, so two
+    // hits arriving together still end in a draw.
+    wheels_link_update(now);
 
     // Same order as run_loop_once() on the laptop: game first, then console.
     game_fsm_update(now);

@@ -38,6 +38,7 @@
 #include "shared_state.h"
 #include "game_fsm.h"
 #include "console.h"
+#include "wheels_link.h"
 #include "debug_log.h"
 
 #define MAX_ADVANCE_MS 600000UL /* cap one +<ms> step at 10 min of simulated time */
@@ -55,6 +56,7 @@ static std::atomic<bool> s_input_done(false);
 // made by this update are reported at the same millisecond.
 static void run_loop_once()
 {
+    wheels_link_update(s_now_ms); // nothing arrives on the laptop; kept so the loop matches the Mega's
     game_fsm_update(s_now_ms);
     console_tick(s_now_ms);
 }
