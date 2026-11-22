@@ -13,7 +13,7 @@
 // If one says "nothing received", check the wire going INTO that board
 // (its pin 17) and the ground wire.
 
-#define LINK_BAUD 115200UL
+#define LINK_BAUD 9600UL // same speed as the real link (board_link_protocol.h)
 #define SEND_PERIOD_MS 500UL
 #define SILENT_WARNING_MS 2000UL
 

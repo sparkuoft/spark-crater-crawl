@@ -125,6 +125,13 @@ The two clocks aren't synchronised, so the Game Mega times every hit by its own 
 the `H` arrives. If the Game Mega hears nothing for 1 s it prints
 `LINK nothing from the Wheels Mega...`. Malformed lines are ignored and counted (shown by `?`).
 
+The link runs at **9600 baud**, slower than the USB Serial Monitor (115200). That is on
+purpose. FastLED turns interrupts off for about 0.9 ms each time it updates the strip, and at
+115200 the Game Mega lost the bytes that arrived during that time. Lines came out chopped
+(`A 0 12`) or joined (`A 0 1234 0`). A joined line can even look valid: that one reads as
+"player 0 not homed". At 9600 a byte takes about 1 ms, so the serial port holds them until
+interrupts are back on.
+
 ## Wiring
 
 **Between the boards:** Game 16 → Wheels 17, Game 17 ← Wheels 16, GND ↔ GND.

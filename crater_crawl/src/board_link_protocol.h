@@ -38,7 +38,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LINK_BAUD 115200UL
+/* 9600, not faster. FastLED.show() on the Game Mega turns interrupts off for
+ * about 0.9 ms (30 LEDs), every 20 ms. While interrupts are off, the Mega's
+ * serial port can only hold 2 incoming bytes. At 115200 baud that is under
+ * 0.2 ms, so bytes were lost and lines arrived chopped or joined together.
+ * At 9600 a byte takes about 1 ms, so nothing is lost. The link only needs
+ * about 250 bytes/s. If the strip gets much longer than ~50 LEDs, show()
+ * takes over 1.5 ms: tell GL. */
+#define LINK_BAUD 9600UL
 #define LINK_LINE_MAX 32           /* longest line, including the '\0' */
 #define LINK_ANGLE_PERIOD_MS 100UL /* how often the Wheels Mega reports angles */
 #define LINK_NUM_PLAYERS 2
