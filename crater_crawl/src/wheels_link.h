@@ -31,6 +31,11 @@ void wheels_link_handle_line(const char *line, uint32_t now_ms);
  * real motors). */
 void wheels_link_set_muted(bool muted);
 
+/* Forgets everything the link has seen and drops any half-received line.
+ * The unit tests call this when they finish, since they feed it pretend
+ * messages at pretend times. */
+void wheels_link_restart();
+
 /* What the link has seen, for the console's ? command. */
 struct WheelsLinkStatus
 {

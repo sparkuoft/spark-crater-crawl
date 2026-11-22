@@ -167,6 +167,17 @@ void wheels_link_handle_line(const char *line, uint32_t now_ms)
     }
 }
 
+void wheels_link_restart()
+{
+    s_status = WheelsLinkStatus();
+    s_reported_silent = false;
+#ifdef ARDUINO
+    s_reader = LinkLineReader();
+    while (Serial2.available() > 0)
+        Serial2.read();
+#endif
+}
+
 void wheels_link_set_muted(bool muted)
 {
     s_muted = muted;

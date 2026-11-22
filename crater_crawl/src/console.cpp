@@ -5,6 +5,7 @@
 #include "game_fsm.h"
 #include "pillar_fsm.h"
 #include "wheels_link.h"
+#include "unit_tests.h"
 #include "board_link_protocol.h"
 #include "debug_log.h"
 
@@ -36,6 +37,7 @@ static void print_help()
     log_text("  m<p>      home player p: then turn that player's wheel past the photo-interrupter\n");
     log_text("  l <msg>   act as if <msg> came from the Wheels Mega, e.g. l H 1 -1\n");
     log_text("  ?         print state\n");
+    log_text("  t         run the unit tests (a few seconds; resets the game)\n");
 #ifndef ARDUINO
     // Handled by the laptop driver (laptop/main.cpp), not the Mega sketch.
     log_text("  +<ms>     advance simulated time, e.g. +3000 (live mode: wait that long)\n");
@@ -207,6 +209,10 @@ void console_handle_line(const char *line, uint32_t now_ms)
 
     case '?':
         print_status(now_ms);
+        break;
+
+    case 't':
+        run_unit_tests(now_ms);
         break;
 
     default:
