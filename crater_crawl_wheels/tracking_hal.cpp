@@ -40,6 +40,13 @@ static const int8_t ENCODER_SIGN[NUM_TRACKED] = {1, 1};
  * while; Tracking's default gives up after 10 s. */
 #define HOMING_TIMEOUT_MS 60000UL
 
+/* How far apart the photo-interrupter crossing and the AS5600 reading taken
+ * for it may be. Tracking's default is 2 ms, but on this board the reading
+ * goes through the I2C mux and can wait behind the sketch's own AS5600 read,
+ * so it can land a few ms after the crossing. Turning the wheel by hand, 10 ms
+ * is a fraction of a degree. */
+#define REFERENCE_SAMPLE_TOLERANCE_MS 10UL
+
 /* ---- State ------------------------------------------------------------- */
 
 static CharacterModule s_players[NUM_TRACKED];
@@ -49,6 +56,10 @@ static TrackingAngleReader s_read_angle_now = nullptr;
 static uint16_t s_cached_x10[NUM_TRACKED];
 static uint32_t s_cached_ms[NUM_TRACKED];
 static bool s_cached[NUM_TRACKED];
+
+// The AS5600 reading taken for a photo-interrupter crossing (tracking_update).
+static CharacterEncoderSample s_reference_sample[NUM_TRACKED];
+static bool s_reference_sample_ready[NUM_TRACKED];
 
 static volatile uint8_t s_last_portk = 0;
 
@@ -82,21 +93,18 @@ static bool read_encoder(void *, uint8_t channel, CharacterEncoderSample *sample
     return true;
 }
 
-// Called once, right after a photo-interrupter fires. Reads the AS5600 fresh
-// and stamps it with when it was really read; Tracking only accepts it if
-// that's within 2 ms of the crossing.
+// Called by Tracking's update when a photo-interrupter crossing is waiting.
+// Hands over the AS5600 reading tracking_update() took just before the update
+// (stamped with when it was really read). Tracking only accepts it if that's
+// within REFERENCE_SAMPLE_TOLERANCE_MS of the crossing.
 static bool read_reference_sample(void *, uint8_t channel, uint32_t crossing_ms, CharacterEncoderSample *sample)
 {
     (void)crossing_ms;
     int8_t p = player_for_channel(channel);
-    float degrees = 0.0f;
-    if (p < 0 || s_read_angle_now == nullptr || !s_read_angle_now((uint8_t)p, &degrees))
+    if (p < 0 || !s_reference_sample_ready[p])
         return false;
-
-    uint32_t read_ms = millis();
-    tracking_note_angle((uint8_t)p, degrees, read_ms);
-    sample->angle_x10 = s_cached_x10[p];
-    sample->sampled_ms = read_ms;
+    *sample = s_reference_sample[p];
+    s_reference_sample_ready[p] = false;
     return true;
 }
 
@@ -192,6 +200,7 @@ bool tracking_begin(TrackingAngleReader read_angle_now, uint32_t now_ms)
         cfg.encoder_sign = ENCODER_SIGN[p];
         cfg.max_sample_age_ms = MAX_SAMPLE_AGE_MS;
         cfg.homing_timeout_ms = HOMING_TIMEOUT_MS;
+        cfg.reference_sample_tolerance_ms = REFERENCE_SAMPLE_TOLERANCE_MS;
         cfg.hardware = hw;
         if (!character_init(&s_players[p], &cfg))
         {
@@ -230,8 +239,32 @@ void tracking_update(uint32_t now_ms)
 {
     for (uint8_t p = 0; p < NUM_TRACKED; p++)
     {
-        if (PLAYER_WIRED[p])
-            character_update(&s_players[p], now_ms);
+        if (!PLAYER_WIRED[p])
+            continue;
+
+        uint32_t update_ms = now_ms;
+
+        // A crossing is waiting: read the AS5600 BEFORE Tracking's update, then
+        // give the update a time taken after that read. Reading it during the
+        // update (the I2C read takes a millisecond or two) would stamp it later
+        // than the update's own "now", and Tracking would reject it as coming
+        // from the future, so homing would never finish.
+        if (s_players[p].reference_pending)
+        {
+            float degrees = 0.0f;
+            if (s_read_angle_now != nullptr && s_read_angle_now(p, &degrees))
+            {
+                uint32_t read_ms = millis();
+                tracking_note_angle(p, degrees, read_ms);
+                s_reference_sample[p].angle_x10 = s_cached_x10[p];
+                s_reference_sample[p].sampled_ms = read_ms;
+                s_reference_sample_ready[p] = true;
+            }
+            update_ms = millis();
+        }
+
+        character_update(&s_players[p], update_ms);
+        s_reference_sample_ready[p] = false; // only ever for the update just run
     }
 }
 
